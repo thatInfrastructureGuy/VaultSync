@@ -8,14 +8,21 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 // Authenticator authenticates client.
 // Returns pointer to Clientset
 func Authenticator() *kubernetes.Clientset {
+	var config *rest.Config
+	var err error
 	kubeconfigPath := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	if len(kubeconfigPath) > 0 {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	} else {
+		config, err = rest.InClusterConfig()
+	}
 	if err != nil {
 		fmt.Printf("Cannot connect to Kubernetes: %v\n", err)
 		os.Exit(1)
@@ -53,37 +60,14 @@ func GetSecretObject(secretName, namespace string) apiv1.Secret {
 	return secret
 }
 
-// CreateNamespace creates namespace if not already present.
-// errors out if already present. Does not update.
-func CreateNamespace(clientset *kubernetes.Clientset, namespace string) {
-	namespaceObject := apiv1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
-	}
-
-	// Create namespace
-	_, err := clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
-	if err != nil {
-		fmt.Println(err)
-		_, err := clientset.CoreV1().Namespaces().Create(&namespaceObject)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-}
-
 // SecretsUpdater puts secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
+// Errors out if namespace is not present. 
+// It does not create namespace as serviceaccount generally should not have permissions to create namespaces.
 func SecretsUpdater(secretName, namespace string) {
 	secret := GetSecretObject(secretName, namespace)
 	clientset := Authenticator()
-	CreateNamespace(clientset, namespace)
+	//CreateNamespace(clientset, namespace)
 
 	secretOut, err := clientset.CoreV1().Secrets(namespace).Update(&secret)
 	if err != nil {
