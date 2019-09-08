@@ -17,12 +17,14 @@ import (
 
 var vaultName, setDebug, convertHyphenToUnderscores string
 
-type secretAttribute struct {
-	dateUpdated    float64
-	activationDate float64
-	expiryDate     float64
-	value          string
-	isEnabled      bool
+// SecretAttribute is constructed after querying Vault for each secret.
+// It contains various attributes of secret other than values.
+type SecretAttribute struct {
+	DateUpdated    float64
+	ActivationDate float64
+	ExpiryDate     float64
+	Value          string
+	IsEnabled      bool
 }
 
 func init() {
@@ -34,7 +36,10 @@ func init() {
 	vaultName = os.Getenv("KVAULT")
 	setDebug = strings.ToLower(os.Getenv("DEBUG"))
 	convertHyphenToUnderscores = strings.ToLower(os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES"))
+}
 
+// Initializer creates KeyVault instance
+func Initializer() keyvault.BaseClient {
 	authorizer, err := kvauth.NewAuthorizerFromEnvironment()
 	if err != nil {
 		fmt.Printf("unable to create vault authorizer: %v\n", err)
@@ -49,11 +54,11 @@ func init() {
 		basicClient.ResponseInspector = logResponse()
 	}
 
-	//listSecrets(basicClient)
+	return basicClient
 }
 
 // ListSecrets Get all the secrets from specified keyvault
-func ListSecrets(basicClient keyvault.BaseClient) map[string]secretAttribute {
+func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 	ctx := context.Background()
 	secretItr, err := basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
 	if err != nil {
@@ -61,7 +66,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]secretAttribute {
 		os.Exit(1)
 	}
 
-	secretList := make(map[string]secretAttribute)
+	secretList := make(map[string]SecretAttribute)
 
 	for {
 		if secretItr.Values() == nil {
@@ -85,12 +90,12 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]secretAttribute {
 			}
 
 			//Create Key-Value map
-			secretList[secretName] = secretAttribute{
-				dateUpdated:    secretProperties.Attributes.Updated.Duration().Seconds(),
-				activationDate: activates,
-				expiryDate:     expires,
-				value:          secretValue,
-				isEnabled:      *secretProperties.Attributes.Enabled,
+			secretList[secretName] = SecretAttribute{
+				DateUpdated:    secretProperties.Attributes.Updated.Duration().Seconds(),
+				ActivationDate: activates,
+				ExpiryDate:     expires,
+				Value:          secretValue,
+				IsEnabled:      *secretProperties.Attributes.Enabled,
 			}
 		}
 
@@ -115,7 +120,7 @@ func getSecret(basicClient keyvault.BaseClient, secretName string, isEnabled boo
 		fmt.Printf("unable to get value for secret: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println(*secretResp.Value)
+
 	return *secretResp.Value
 }
 
