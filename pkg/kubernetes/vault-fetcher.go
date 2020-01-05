@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/thatInfrastructureGuy/VaultSync/pkg/azure/keyvault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.0/pkg/azure/keyvault"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
