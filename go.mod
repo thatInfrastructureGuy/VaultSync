@@ -1,4 +1,4 @@
-module github.com/thatInfrastructureGuy/VaultSync
+module github.com/thatInfrastructureGuy/VaultSync/v0.0.0
 
 go 1.13
 
@@ -13,6 +13,6 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apimachinery v0.17.0
-	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/client-go v0.17.0
 	k8s.io/utils v0.0.0-20191218082557-f07c713de883 // indirect
 )
