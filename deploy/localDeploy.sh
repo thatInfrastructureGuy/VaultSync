@@ -1,4 +1,6 @@
-go build ../vaultsync.go
+# Build the binary
+CGO_ENABLED=0 go build -a -trimpath -tags netgo -ldflags '-s -w -extldflags "-static"' \
+    -v -o vaultsync cmd/standalone/main.go
 
 # Required Environment Variables
 export  AZURE_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
