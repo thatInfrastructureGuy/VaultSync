@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thatInfrastructureGuy/VaultSync/kubernetes"
+	"github.com/thatInfrastructureGuy/VaultSync/pkg/kubernetes"
 )
 
 var vaultName, namespace, secretName string
