@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/keyvault/keyvault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.0/pkg/common/data"
 )
 
 // ListSecrets Get all the secrets from specified keyvault
-func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
+func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribute {
 	currentTimeUTC := time.Now().UTC()
 	ctx := context.Background()
 	secretItr, err := basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
@@ -21,7 +22,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 		os.Exit(1)
 	}
 
-	secretList := make(map[string]SecretAttribute)
+	secretList := make(map[string]data.SecretAttribute)
 
 	for {
 		if secretItr.Values() == nil {
@@ -66,7 +67,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 			}
 
 			//Create Key-Value map
-			secretList[secretName] = SecretAttribute{
+			secretList[secretName] = data.SecretAttribute{
 				LastUpdated:    lastUpdated,
 				ActivationDate: activationDate,
 				ExpiryDate:     expiryDate,

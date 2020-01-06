@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.0/pkg/azure/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.0/pkg/kubernetes"
 )
 
@@ -25,5 +26,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	kubernetes.SecretsUpdater(secretName, namespace)
+	// Poll secrets from keyvault
+	secretsList := keyvault.ListSecrets(keyvault.Initializer())
+
+	// Update kuberenetes secrets
+	kubernetes.Authenticate().SecretsUpdater(secretsList, secretName, namespace)
 }

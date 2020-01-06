@@ -9,9 +9,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// Authenticator authenticates client.
-// Returns pointer to Clientset
-func Authenticator() *kubernetes.Clientset {
+type kubeconfig struct {
+	clientset *kubernetes.Clientset
+}
+
+// Authenticate authenticates client.
+func (k *kubeconfig) Authenticate() {
 	var config *rest.Config
 	var err error
 	kubeconfigPath := os.Getenv("KUBECONFIG")
@@ -24,10 +27,8 @@ func Authenticator() *kubernetes.Clientset {
 		fmt.Printf("Cannot connect to Kubernetes: %v\n", err)
 		os.Exit(1)
 	}
-	clientset, err := kubernetes.NewForConfig(config)
+	k.clientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	return clientset
 }
