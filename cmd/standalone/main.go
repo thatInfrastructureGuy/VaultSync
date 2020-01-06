@@ -27,10 +27,15 @@ func main() {
 	}
 
 	// Poll secrets from keyvault
-	secretsList := keyvault.ListSecrets(keyvault.Initializer())
+	secretList := keyvault.ListSecrets(keyvault.Initializer())
 
 	// Update kuberenetes secrets
-	err := kubernetes.Authenticate().SecretsUpdater(secretName, namespace, secretsList)
+	k := kubernetes.Kubeconfig{}
+	err := k.Authenticate()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = k.SecretsUpdater(secretName, namespace, secretList)
 	if err != nil {
 		fmt.Println(err)
 	}

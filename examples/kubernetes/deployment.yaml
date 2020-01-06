@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
@@ -16,14 +16,14 @@ spec:
     spec:
       initContainers:
       - name: vaultsync
-        image: oyeee/test:v1
+        image: datinfraguy/vaultsync:v0.0.2
         imagePullPolicy: Always
         envFrom:
         - secretRef:
             name: vaultsync
         env:
         - name: KVAULT
-          value: yoko
+          value: kvtestin
         - name: SECRETS_NAMESPACE
           valueFrom:
             fieldRef:
@@ -33,7 +33,7 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: yoko
+            name: kvtestin
         name: nginxapp
         image: nginx
         imagePullPolicy: Always
