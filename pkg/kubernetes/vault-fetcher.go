@@ -8,8 +8,8 @@ import (
 
 // GetSecretObject gets secrets from Azure KeyVault.
 // Creates a Kubernetes Secret Object in memory.
-func GetSecretObject(secretName, namespace string) apiv1.Secret {
-	secret := apiv1.Secret{
+func GetSecretObject(secretName, namespace string) (secretObject apiv1.Secret) {
+	secretObject = apiv1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
 			APIVersion: "v1",
@@ -25,8 +25,8 @@ func GetSecretObject(secretName, namespace string) apiv1.Secret {
 	// Poll secrets from keyvault
 	secretList := keyvault.ListSecrets(keyvault.Initializer())
 	for secretKey, secretAttributes := range secretList {
-		secret.Data[secretKey] = []byte(secretAttributes.Value)
+		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 	}
 
-	return secret
+	return
 }

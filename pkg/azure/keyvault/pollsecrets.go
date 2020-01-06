@@ -13,7 +13,7 @@ import (
 
 // ListSecrets Get all the secrets from specified keyvault
 func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
-	currentTimeUTC := time.Now().UTC().Unix()
+	currentTimeUTC := time.Now().UTC()
 	ctx := context.Background()
 	secretItr, err := basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
 	if err != nil {
@@ -29,14 +29,15 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 		}
 
 		for _, secretProperties := range secretItr.Values() {
-			var activates, expires int64
-			dateUpdated := int64(secretProperties.Attributes.Updated.Duration().Seconds())
+			var activationDate, expiryDate time.Time
+
+			lastUpdated := time.Time(*secretProperties.Attributes.Updated)
 			secretName := path.Base(*secretProperties.ID)
 
-			// Check if activation date is passed.
+			// Check Activation date
 			if secretProperties.Attributes.NotBefore != nil {
-				activates = int64(secretProperties.Attributes.NotBefore.Duration().Seconds())
-				if activates > currentTimeUTC {
+				activationDate = time.Time(*secretProperties.Attributes.NotBefore)
+				if activationDate.After(currentTimeUTC) {
 					fmt.Printf("%v key is not activated yet\n", secretName)
 					continue
 				}
@@ -44,8 +45,8 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 
 			// Check Expiry date
 			if secretProperties.Attributes.Expires != nil {
-				expires = int64(secretProperties.Attributes.Expires.Duration().Seconds())
-				if expires < currentTimeUTC {
+				expiryDate = time.Time(*secretProperties.Attributes.Expires)
+				if expiryDate.Before(currentTimeUTC) {
 					fmt.Printf("%v key has expired\n", secretName)
 					continue
 				}
@@ -66,9 +67,9 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]SecretAttribute {
 
 			//Create Key-Value map
 			secretList[secretName] = SecretAttribute{
-				DateUpdated:    dateUpdated,
-				ActivationDate: activates,
-				ExpiryDate:     expires,
+				LastUpdated:    lastUpdated,
+				ActivationDate: activationDate,
+				ExpiryDate:     expiryDate,
 				Value:          secretValue,
 				IsEnabled:      isEnabled,
 			}
