@@ -11,9 +11,9 @@ var vaultName, setDebug, convertHyphenToUnderscores string
 // SecretAttribute is constructed after querying Vault for each secret.
 // It contains various attributes of secret other than values.
 type SecretAttribute struct {
-	DateUpdated    float64
-	ActivationDate float64
-	ExpiryDate     float64
+	DateUpdated    int64
+	ActivationDate int64
+	ExpiryDate     int64
 	Value          string
 	IsEnabled      bool
 }
