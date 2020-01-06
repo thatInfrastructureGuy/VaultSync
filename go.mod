@@ -1,4 +1,4 @@
-module github.com/thatInfrastructureGuy/VaultSync/v0.0.0
+module github.com/thatInfrastructureGuy/VaultSync/v0.0.1
 
 go 1.13
 

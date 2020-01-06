@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/keyvault/keyvault"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.0/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 )
 
 // ListSecrets Get all the secrets from specified keyvault

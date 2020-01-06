@@ -9,14 +9,14 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-type kubeconfig struct {
+// Kubeconfig contains the auth creds
+type Kubeconfig struct {
 	clientset *kubernetes.Clientset
 }
 
 // Authenticate authenticates client.
-func (k *kubeconfig) Authenticate() {
+func (k *Kubeconfig) Authenticate() (err error) {
 	var config *rest.Config
-	var err error
 	kubeconfigPath := os.Getenv("KUBECONFIG")
 	if len(kubeconfigPath) > 0 {
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
@@ -25,10 +25,12 @@ func (k *kubeconfig) Authenticate() {
 	}
 	if err != nil {
 		fmt.Printf("Cannot connect to Kubernetes: %v\n", err)
-		os.Exit(1)
+		return err
 	}
 	k.clientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
+	return nil
 }
