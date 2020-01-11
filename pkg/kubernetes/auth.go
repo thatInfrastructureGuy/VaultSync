@@ -11,11 +11,13 @@ import (
 
 // Kubeconfig contains the auth creds
 type Kubeconfig struct {
-	clientset *kubernetes.Clientset
+	clientset  *kubernetes.Clientset
+	SecretName string
+	Namespace  string
 }
 
 // Authenticate authenticates client.
-func (k *Kubeconfig) Authenticate() (err error) {
+func (k Kubeconfig) Authenticate() (err error) {
 	var config *rest.Config
 	kubeconfigPath := os.Getenv("KUBECONFIG")
 	if len(kubeconfigPath) > 0 {

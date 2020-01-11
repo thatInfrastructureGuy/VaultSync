@@ -30,12 +30,17 @@ func main() {
 	secretList := keyvault.ListSecrets(keyvault.Initializer())
 
 	// Update kuberenetes secrets
-	k := kubernetes.Kubeconfig{}
-	err := k.Authenticate()
+	var destination kubernetes.Destination = kubernetes.Kubeconfig{
+		SecretName: secretName,
+		Namespace:  namespace,
+	}
+
+	// Use destination interface methods
+	err := destination.Authenticate()
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = k.SecretsUpdater(secretName, namespace, secretList)
+	err = destination.SecretsUpdater(secretList)
 	if err != nil {
 		fmt.Println(err)
 	}
