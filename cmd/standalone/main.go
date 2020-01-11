@@ -27,7 +27,8 @@ func main() {
 	}
 
 	// Poll secrets from keyvault
-	secretList := keyvault.ListSecrets(keyvault.Initializer())
+	var source keyvault.Source = &keyvault.Keyvault{}
+	secretList := source.ListSecrets()
 
 	// Update kuberenetes secrets
 	var destination kubernetes.Destination = kubernetes.Kubeconfig{

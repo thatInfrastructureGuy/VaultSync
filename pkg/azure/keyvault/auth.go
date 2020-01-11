@@ -9,21 +9,24 @@ import (
 	kvauth "github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 )
 
+type Keyvault struct {
+	basicClient keyvault.BaseClient
+}
+
 // Initializer creates KeyVault instance
-func Initializer() keyvault.BaseClient {
+func (k *Keyvault) Initializer() {
 	authorizer, err := kvauth.NewAuthorizerFromEnvironment()
 	if err != nil {
 		fmt.Printf("unable to create vault authorizer: %v\n", err)
 		os.Exit(1)
 	}
 
-	basicClient := keyvault.New()
-	basicClient.Authorizer = authorizer
+	k.basicClient = keyvault.New()
+	k.basicClient.Authorizer = authorizer
 
 	if strings.ToLower(setDebug) == "true" {
-		basicClient.RequestInspector = logRequest()
-		basicClient.ResponseInspector = logResponse()
+		k.basicClient.RequestInspector = logRequest()
+		k.basicClient.ResponseInspector = logResponse()
 	}
 
-	return basicClient
 }

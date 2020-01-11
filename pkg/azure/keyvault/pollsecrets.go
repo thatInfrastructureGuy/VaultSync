@@ -8,15 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/keyvault/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 )
 
 // ListSecrets Get all the secrets from specified keyvault
-func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribute {
+func (k *Keyvault) ListSecrets() map[string]data.SecretAttribute {
 	currentTimeUTC := time.Now().UTC()
 	ctx := context.Background()
-	secretItr, err := basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
+	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
 	if err != nil {
 		fmt.Printf("unable to get list of secrets: %v\n", err)
 		os.Exit(1)
@@ -32,7 +31,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribut
 		for _, secretProperties := range secretItr.Values() {
 			var activationDate, expiryDate time.Time
 
-			lastUpdated := time.Time(*secretProperties.Attributes.Updated)
+			dateUpdated := time.Time(*secretProperties.Attributes.Updated)
 			secretName := path.Base(*secretProperties.ID)
 
 			// Check Activation date
@@ -59,7 +58,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribut
 				continue
 			}
 
-			secretValue := getSecret(basicClient, secretName)
+			secretValue := k.getSecret(secretName)
 
 			// Check if ALL hyphers should be converted to underscores
 			if convertHyphenToUnderscores == "true" {
@@ -68,7 +67,7 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribut
 
 			//Create Key-Value map
 			secretList[secretName] = data.SecretAttribute{
-				LastUpdated:    lastUpdated,
+				DateUpdated:    dateUpdated,
 				ActivationDate: activationDate,
 				ExpiryDate:     expiryDate,
 				Value:          secretValue,
@@ -88,8 +87,8 @@ func ListSecrets(basicClient keyvault.BaseClient) map[string]data.SecretAttribut
 
 // Get SecretValue from KeyVault if Secret is enabled.
 // If secret is disabled, return empty string.
-func getSecret(basicClient keyvault.BaseClient, secretName string) (value string) {
-	secretResp, err := basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
+func (k *Keyvault) getSecret(secretName string) (value string) {
+	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
 	if err != nil {
 		fmt.Printf("unable to get value for secret: %v\n", err)
 		os.Exit(1)
