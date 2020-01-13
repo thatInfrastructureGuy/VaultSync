@@ -31,7 +31,7 @@ func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secre
 // secretUpdater updates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k Kubeconfig) secretUpdater(secretObject *apiv1.Secret) error {
+func (k Config) secretUpdater(secretObject *apiv1.Secret) error {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
 	if err != nil {
@@ -45,7 +45,7 @@ func (k Kubeconfig) secretUpdater(secretObject *apiv1.Secret) error {
 // secretCreator creates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k Kubeconfig) secretCreator(secretObject *apiv1.Secret) (err error) {
+func (k Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
 	if err != nil {
@@ -57,7 +57,7 @@ func (k Kubeconfig) secretCreator(secretObject *apiv1.Secret) (err error) {
 }
 
 // SecretsUpdater is wrapper over kube secret operations.
-func (k Kubeconfig) SecretsUpdater(secretList map[string]data.SecretAttribute) error {
+func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error {
 	// Get the secret object
 	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
 	if err != nil {

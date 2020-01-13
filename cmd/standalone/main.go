@@ -31,7 +31,7 @@ func main() {
 	secretList := source.ListSecrets()
 
 	// Update kuberenetes secrets
-	var destination kubernetes.Destination = kubernetes.Kubeconfig{
+	var destination kubernetes.Destination = kubernetes.Config{
 		SecretName: secretName,
 		Namespace:  namespace,
 	}
