@@ -3,15 +3,10 @@ package keyvault
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/keyvault/keyvault"
 	kvauth "github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 )
-
-type Keyvault struct {
-	basicClient keyvault.BaseClient
-}
 
 // Initializer creates KeyVault instance
 func (k *Keyvault) Initializer() {
@@ -23,10 +18,4 @@ func (k *Keyvault) Initializer() {
 
 	k.basicClient = keyvault.New()
 	k.basicClient.Authorizer = authorizer
-
-	if strings.ToLower(setDebug) == "true" {
-		k.basicClient.RequestInspector = logRequest()
-		k.basicClient.ResponseInspector = logResponse()
-	}
-
 }

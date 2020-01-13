@@ -4,9 +4,19 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"strings"
 
 	"github.com/Azure/go-autorest/autorest"
 )
+
+func (k *Keyvault) logger() {
+	setDebug = strings.ToLower(os.Getenv("DEBUG"))
+	if strings.ToLower(setDebug) == "true" {
+		k.basicClient.RequestInspector = logRequest()
+		k.basicClient.ResponseInspector = logResponse()
+	}
+}
 
 func logRequest() autorest.PrepareDecorator {
 	return func(p autorest.Preparer) autorest.Preparer {
