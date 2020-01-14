@@ -6,6 +6,7 @@ import (
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/azure/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
 var vaultName, namespace, secretName string
@@ -27,8 +28,12 @@ func main() {
 	}
 
 	// Poll secrets from keyvault
-	var source keyvault.Source = &keyvault.Keyvault{}
-	secretList := source.ListSecrets()
+	var azure vault.Vaults = &keyvault.Keyvault{}
+	err := azure.Initializer()
+	if err != nil {
+		fmt.Println(err)
+	}
+	secretList := azure.ListSecrets()
 
 	// Update kuberenetes secrets
 	var destination kubernetes.Destination = kubernetes.Config{
@@ -37,7 +42,7 @@ func main() {
 	}
 
 	// Use destination interface methods
-	err := destination.Authenticate()
+	err = destination.Authenticate()
 	if err != nil {
 		fmt.Println(err)
 	}
