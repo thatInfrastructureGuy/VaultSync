@@ -11,7 +11,7 @@ import (
 var vaultName, namespace, secretName string
 
 func main() {
-	vaultName = os.Getenv("KVAULT")
+	vaultName = os.Getenv("VAULT_NAME")
 	if len(vaultName) == 0 {
 		fmt.Println("Azure KeyVault not provided. Exiting!")
 		os.Exit(1)

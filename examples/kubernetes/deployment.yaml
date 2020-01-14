@@ -22,7 +22,7 @@ spec:
         - secretRef:
             name: vaultsync
         env:
-        - name: KVAULT
+        - name: VAULT_NAME
           value: kvtestin
         - name: SECRETS_NAMESPACE
           valueFrom:
