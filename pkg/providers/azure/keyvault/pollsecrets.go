@@ -12,7 +12,7 @@ import (
 )
 
 // ListSecrets Get all the secrets from specified keyvault
-func (k *Keyvault) ListSecrets() map[string]data.SecretAttribute {
+func (k *Keyvault) ListSecrets() (secretList map[string]data.SecretAttribute, err error) {
 	currentTimeUTC := time.Now().UTC()
 	ctx := context.Background()
 	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
@@ -21,7 +21,7 @@ func (k *Keyvault) ListSecrets() map[string]data.SecretAttribute {
 		os.Exit(1)
 	}
 
-	secretList := make(map[string]data.SecretAttribute)
+	secretList = make(map[string]data.SecretAttribute)
 
 	for {
 		if secretItr.Values() == nil {
@@ -58,7 +58,10 @@ func (k *Keyvault) ListSecrets() map[string]data.SecretAttribute {
 				continue
 			}
 
-			secretValue := k.getSecret(secretName)
+			secretValue, err := k.getSecret(secretName)
+			if err != nil {
+				return nil, err
+			}
 
 			// Check if ALL hyphers should be converted to underscores
 			if convertHyphenToUnderscores == "true" {
@@ -77,22 +80,22 @@ func (k *Keyvault) ListSecrets() map[string]data.SecretAttribute {
 
 		err = secretItr.NextWithContext(ctx)
 		if err != nil {
-			fmt.Printf("unable to get next page for list of secrets: %v\n", err)
-			os.Exit(1)
+			fmt.Println("unable to get next page for list of secrets.")
+			return nil, err
 		}
 	}
 
-	return secretList
+	return secretList, nil
 }
 
 // Get SecretValue from KeyVault if Secret is enabled.
 // If secret is disabled, return empty string.
-func (k *Keyvault) getSecret(secretName string) (value string) {
+func (k *Keyvault) getSecret(secretName string) (value string, err error) {
 	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
 	if err != nil {
-		fmt.Printf("unable to get value for secret: %v\n", err)
-		os.Exit(1)
+		fmt.Println("unable to get value for secret")
+		return "", err
 	}
 
-	return *secretResp.Value
+	return *secretResp.Value, nil
 }
