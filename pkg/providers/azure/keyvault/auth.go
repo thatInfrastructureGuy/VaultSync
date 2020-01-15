@@ -9,8 +9,8 @@ type Keyvault struct {
 	basicClient keyvault.BaseClient
 }
 
-// Initializer creates KeyVault instance
-func (k *Keyvault) Initializer() (err error) {
+// initialize creates KeyVault instance
+func (k *Keyvault) initialize() (err error) {
 	authorizer, err := kvauth.NewAuthorizerFromEnvironment()
 	if err != nil {
 		return err

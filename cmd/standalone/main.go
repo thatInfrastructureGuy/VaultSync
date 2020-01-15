@@ -4,54 +4,67 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/azure/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
-var vaultName, namespace, secretName string
-
 func main() {
-	vaultName = os.Getenv("VAULT_NAME")
-	if len(vaultName) == 0 {
-		fmt.Println("Azure KeyVault not provided. Exiting!")
+	if os.Getenv("PROVIDER") == "" || os.Getenv("VAULT_NAME") == "" || os.Getenv("SECRETS_NAMESPACE") == "" {
+		fmt.Println("Required Env Vars not set, exiting...")
 		os.Exit(1)
 	}
-	secretName = os.Getenv("SECRET_NAME")
+	provider := os.Getenv("PROVIDER")
+	vaultName := os.Getenv("VAULT_NAME")
+	namespace := os.Getenv("SECRETS_NAMESPACE")
+
+	consumerType := os.Getenv("CONSUMER")
+	secretName := os.Getenv("SECRET_NAME")
 	if len(secretName) == 0 {
 		secretName = vaultName
 	}
-	namespace = os.Getenv("SECRETS_NAMESPACE")
-	if len(namespace) == 0 {
-		fmt.Println("Namespace not provided. Exiting!")
-		os.Exit(1)
+
+	var vault vault.Vaults
+	var destination consumer.Consumers
+
+	switch provider {
+	case "azure":
+		vault = &keyvault.Keyvault{}
+	case "aws":
+		return
+	case "gcp":
+		return
+	case "hashicorp":
+		return
+	default:
+		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
+		return
+	}
+
+	switch consumerType {
+	case "kubernetes":
+		destination = kubernetes.Config{
+			SecretName: secretName,
+			Namespace:  namespace,
+		}
+	default:
+		fmt.Println("No consumer provided. Hence using kubernetes as default.")
+		destination = kubernetes.Config{
+			SecretName: secretName,
+			Namespace:  namespace,
+		}
 	}
 
 	// Poll secrets from keyvault
-	var azure vault.Vaults = &keyvault.Keyvault{}
-	err := azure.Initializer()
+	secretList, err := vault.GetSecrets()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
-	}
-	secretList, err := azure.ListSecrets()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	// Update kuberenetes secrets
-	var destination kubernetes.Destination = kubernetes.Config{
-		SecretName: secretName,
-		Namespace:  namespace,
 	}
 
-	// Use destination interface methods
-	err = destination.Authenticate()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	err = destination.SecretsUpdater(secretList)
+	// Update kuberenetes secrets
+	err = destination.PostSecrets(secretList)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

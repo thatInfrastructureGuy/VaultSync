@@ -78,3 +78,16 @@ func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error
 	}
 	return k.secretUpdater(secretObject)
 }
+
+// PostSecrets is common interface function to post secrets to destination
+func (k Config) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
+	err = k.authenticate()
+	if err != nil {
+		return err
+	}
+	err = k.SecretsUpdater(secretList)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -11,8 +11,8 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 )
 
-// ListSecrets Get all the secrets from specified keyvault
-func (k *Keyvault) ListSecrets() (secretList map[string]data.SecretAttribute, err error) {
+// listSecrets Get all the secrets from specified keyvault
+func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, err error) {
 	currentTimeUTC := time.Now().UTC()
 	ctx := context.Background()
 	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
@@ -58,7 +58,7 @@ func (k *Keyvault) ListSecrets() (secretList map[string]data.SecretAttribute, er
 				continue
 			}
 
-			secretValue, err := k.getSecret(secretName)
+			secretValue, err := k.getSecretValue(secretName)
 			if err != nil {
 				return nil, err
 			}
@@ -90,7 +90,7 @@ func (k *Keyvault) ListSecrets() (secretList map[string]data.SecretAttribute, er
 
 // Get SecretValue from KeyVault if Secret is enabled.
 // If secret is disabled, return empty string.
-func (k *Keyvault) getSecret(secretName string) (value string, err error) {
+func (k *Keyvault) getSecretValue(secretName string) (value string, err error) {
 	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
 	if err != nil {
 		fmt.Println("unable to get value for secret")
@@ -98,4 +98,16 @@ func (k *Keyvault) getSecret(secretName string) (value string, err error) {
 	}
 
 	return *secretResp.Value, nil
+}
+
+func (k *Keyvault) GetSecrets() (secretList map[string]data.SecretAttribute, err error) {
+	err = k.initialize()
+	if err != nil {
+		return nil, err
+	}
+	secretList, err = k.listSecrets()
+	if err != nil {
+		return nil, err
+	}
+	return secretList, nil
 }

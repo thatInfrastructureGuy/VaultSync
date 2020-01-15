@@ -16,8 +16,8 @@ type Config struct {
 	Namespace  string
 }
 
-// Authenticate authenticates client.
-func (k Config) Authenticate() (err error) {
+// authenticate authenticates and authorizes the client.
+func (k Config) authenticate() (err error) {
 	var config *rest.Config
 	kubeconfigPath := os.Getenv("KUBECONFIG")
 	if len(kubeconfigPath) > 0 {
