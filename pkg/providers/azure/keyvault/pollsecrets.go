@@ -70,11 +70,8 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 
 			//Create Key-Value map
 			secretList[secretName] = data.SecretAttribute{
-				DateUpdated:    dateUpdated,
-				ActivationDate: activationDate,
-				ExpiryDate:     expiryDate,
-				Value:          secretValue,
-				IsEnabled:      isEnabled,
+				DateUpdated: dateUpdated,
+				Value:       secretValue,
 			}
 		}
 

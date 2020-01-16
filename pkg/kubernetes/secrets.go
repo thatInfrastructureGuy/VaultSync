@@ -2,13 +2,12 @@ package kubernetes
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var kubeSecretExists bool = true
 
 // createSecretObject creates a Kubernetes Secret Object in memory.
 func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secret) {
@@ -58,16 +57,7 @@ func (k Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 
 // SecretsUpdater is wrapper over kube secret operations.
 func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error {
-	// Get the secret object
-	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
-	if err != nil {
-		fmt.Println(err)
-		kubeSecretExists = false
-
-		// Create kube secret empty object
-		secretObject = createSecretObject(k.SecretName, k.Namespace)
-	}
-
+	secretObject, kubeSecretExists := k.getSecretObject()
 	// Instantiate secret data
 	for secretKey, secretAttributes := range secretList {
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
@@ -77,6 +67,37 @@ func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error
 		return k.secretCreator(secretObject)
 	}
 	return k.secretUpdater(secretObject)
+}
+
+func (k Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists bool) {
+	// Get the secret object
+	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
+	if err != nil {
+		fmt.Println(err)
+		kubeSecretExists = false
+
+		// Create kube secret empty object
+		secretObject = createSecretObject(k.SecretName, k.Namespace)
+		return
+	}
+	kubeSecretExists = true
+	return
+}
+func (k Config) GetLastUpdatedDate() (date time.Time, err error) {
+	secretObject, kubeSecretExists := k.getSecretObject()
+	if !kubeSecretExists {
+		return date, nil
+	}
+	annotations := secretObject.GetAnnotations()
+	value, ok := annotations[""]
+	if !ok {
+		return date, nil
+	}
+	date, err = time.Parse(time.RFC3339, value)
+	if err != nil {
+		return date, err
+	}
+	return date, nil
 }
 
 // PostSecrets is common interface function to post secrets to destination
