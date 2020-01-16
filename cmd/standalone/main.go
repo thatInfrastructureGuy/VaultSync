@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
@@ -16,48 +17,16 @@ func main() {
 		fmt.Println("Required Env Vars not set, exiting...")
 		os.Exit(1)
 	}
-	provider := os.Getenv("PROVIDER")
-	vaultName := os.Getenv("VAULT_NAME")
-	namespace := os.Getenv("SECRETS_NAMESPACE")
 
-	consumerType := os.Getenv("CONSUMER")
-	secretName := os.Getenv("SECRET_NAME")
-	if len(secretName) == 0 {
-		secretName = vaultName
+	// Get lastUpdated date timestamp from consumer
+	destination := selectConsumer()
+	destinationlastUpdated, err := destination.GetLastUpdatedDate()
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	var vault vault.Vaults
-	var destination consumer.Consumers
-
-	switch provider {
-	case "azure":
-		vault = &keyvault.Keyvault{}
-	case "aws":
-		vault = &secretsmanager.SecretsManager{}
-	case "gcp":
-		return
-	case "hashicorp":
-		return
-	default:
-		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
-		return
-	}
-
-	switch consumerType {
-	case "kubernetes":
-		destination = kubernetes.Config{
-			SecretName: secretName,
-			Namespace:  namespace,
-		}
-	default:
-		fmt.Println("No consumer provided. Hence using kubernetes as default.")
-		destination = kubernetes.Config{
-			SecretName: secretName,
-			Namespace:  namespace,
-		}
-	}
-
-	// Poll secrets from keyvault
+	// Poll secrets from vault which were updated since lastUpdated value
+	vault := selectProvider(destinationlastUpdated)
 	secretList, err := vault.GetSecrets()
 	if err != nil {
 		fmt.Println(err)
@@ -70,4 +39,44 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func selectProvider(lastUpdated time.Time) (vault vault.Vaults) {
+	provider := os.Getenv("PROVIDER")
+	switch provider {
+	case "azure":
+		vault = &keyvault.Keyvault{DestinationLastUpdated: lastUpdated}
+	case "aws":
+		vault = &secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated}
+	case "gcp":
+		os.Exit(1)
+	case "hashicorp":
+		os.Exit(1)
+	default:
+		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
+		os.Exit(1)
+	}
+	return vault
+}
+
+func selectConsumer() (destination consumer.Consumers) {
+	consumerType := os.Getenv("CONSUMER")
+	switch consumerType {
+	case "kubernetes":
+		namespace := os.Getenv("SECRETS_NAMESPACE")
+		vaultName := os.Getenv("VAULT_NAME")
+		secretName := os.Getenv("SECRET_NAME")
+		if len(secretName) == 0 {
+			secretName = vaultName
+		}
+		destination = kubernetes.Config{
+			SecretName: secretName,
+			Namespace:  namespace,
+		}
+	default:
+		fmt.Println("No consumer provided.")
+		os.Exit(1)
+	}
+
+	return destination
 }

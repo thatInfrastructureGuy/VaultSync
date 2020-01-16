@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -17,7 +18,8 @@ import (
 )
 
 type SecretsManager struct {
-	result *secretsmanager.GetSecretValueOutput
+	result                 *secretsmanager.GetSecretValueOutput
+	DestinationLastUpdated time.Time
 }
 
 func (o *SecretsManager) listSecrets(secretName string) (err error) {

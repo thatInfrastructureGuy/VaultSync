@@ -1,12 +1,15 @@
 package keyvault
 
 import (
+	"time"
+
 	kvauth "github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 )
 
 type Keyvault struct {
-	basicClient keyvault.BaseClient
+	basicClient            keyvault.BaseClient
+	DestinationLastUpdated time.Time
 }
 
 // initialize creates KeyVault instance
