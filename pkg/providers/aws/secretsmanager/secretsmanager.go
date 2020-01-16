@@ -1,13 +1,108 @@
 package secretsmanager
 
-import "github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
+// Use this code snippet in your app.
+// If you need more information about configurations or implementing the sample code, visit the AWS docs:
+// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 
-type SecretsManager struct{}
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 
-func (s *SecretsManager) Initializer() (err error) {
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
+)
+
+type SecretsManager struct {
+	result *secretsmanager.GetSecretValueOutput
+}
+
+func (o *SecretsManager) listSecrets(secretName string) (err error) {
+	//Create a Secrets Manager client
+	svc := secretsmanager.New(session.New())
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId:     aws.String(secretName),
+		VersionStage: aws.String("AWSCURRENT"), // VersionStage defaults to AWSCURRENT if unspecified
+	}
+
+	// In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+	// See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+	o.result, err = svc.GetSecretValue(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case secretsmanager.ErrCodeDecryptionFailure:
+				// Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+				fmt.Println(secretsmanager.ErrCodeDecryptionFailure, aerr.Error())
+
+			case secretsmanager.ErrCodeInternalServiceError:
+				// An error occurred on the server side.
+				fmt.Println(secretsmanager.ErrCodeInternalServiceError, aerr.Error())
+
+			case secretsmanager.ErrCodeInvalidParameterException:
+				// You provided an invalid value for a parameter.
+				fmt.Println(secretsmanager.ErrCodeInvalidParameterException, aerr.Error())
+
+			case secretsmanager.ErrCodeInvalidRequestException:
+				// You provided a parameter value that is not valid for the current state of the resource.
+				fmt.Println(secretsmanager.ErrCodeInvalidRequestException, aerr.Error())
+
+			case secretsmanager.ErrCodeResourceNotFoundException:
+				// We can't find the resource that you asked for.
+				fmt.Println(secretsmanager.ErrCodeResourceNotFoundException, aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return err
+	}
 	return nil
 }
 
-func (s *SecretsManager) ListSecrets() (secretList map[string]data.SecretAttribute, err error) {
+func (o *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
+	secretList := make(map[string]data.SecretAttribute)
+	err := o.listSecrets("devtest1")
+	if err != nil {
+		return nil, err
+	}
+	secrets, err := o.getSecretValuesJson()
+	if err != nil {
+		return nil, err
+	}
+	var keyvalue map[string]interface{}
+	err = json.Unmarshal([]byte(secrets), &keyvalue)
+	if err != nil {
+		return nil, err
+	}
+	for key, valueInterface := range keyvalue {
+		value := fmt.Sprintf("%v", valueInterface)
+		secretList[key] = data.SecretAttribute{
+			Value:       value,
+			DateUpdated: *o.result.CreatedDate,
+		}
+	}
 	return secretList, nil
+}
+
+func (o *SecretsManager) getSecretValuesJson() (secretsJson string, err error) {
+	// Decrypts secret using the associated KMS CMK.
+	// Depending on whether the secret is a string or binary, one of these fields will be populated.
+	var secretString, decodedBinarySecret string
+	if o.result.SecretString != nil {
+		secretString = *o.result.SecretString
+		return secretString, nil
+	}
+	decodedBinarySecretBytes := make([]byte, base64.StdEncoding.DecodedLen(len(o.result.SecretBinary)))
+	length, err := base64.StdEncoding.Decode(decodedBinarySecretBytes, o.result.SecretBinary)
+	if err != nil {
+		fmt.Println("Base64 Decode Error:", err)
+		return "", err
+	}
+	decodedBinarySecret = string(decodedBinarySecretBytes[:length])
+	return decodedBinarySecret, nil
 }

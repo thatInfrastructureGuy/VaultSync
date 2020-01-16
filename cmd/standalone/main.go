@@ -6,6 +6,7 @@ import (
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/aws/secretsmanager"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/azure/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
@@ -32,7 +33,7 @@ func main() {
 	case "azure":
 		vault = &keyvault.Keyvault{}
 	case "aws":
-		return
+		vault = &secretsmanager.SecretsManager{}
 	case "gcp":
 		return
 	case "hashicorp":
