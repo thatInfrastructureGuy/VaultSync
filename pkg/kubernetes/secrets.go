@@ -20,7 +20,6 @@ func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secre
 			Name:      secretName,
 			Namespace: namespace,
 		},
-		Data: map[string][]byte{},
 		Type: "Opaque",
 	}
 
@@ -30,7 +29,7 @@ func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secre
 // secretUpdater updates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k Config) secretUpdater(secretObject *apiv1.Secret) error {
+func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
 	if err != nil {
@@ -44,7 +43,7 @@ func (k Config) secretUpdater(secretObject *apiv1.Secret) error {
 // secretCreator creates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k Config) secretCreator(secretObject *apiv1.Secret) (err error) {
+func (k *Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
 	if err != nil {
@@ -55,10 +54,11 @@ func (k Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 	return nil
 }
 
-// SecretsUpdater is wrapper over kube secret operations.
-func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error {
+// secretsUpdater is an internal wrapper over kube secret operations.
+func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) error {
 	secretObject, kubeSecretExists := k.getSecretObject()
 	// Instantiate secret data
+	secretObject.Data = make(map[string][]byte)
 	for secretKey, secretAttributes := range secretList {
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 	}
@@ -73,7 +73,7 @@ func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error
 	return k.secretUpdater(secretObject)
 }
 
-func (k Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists bool) {
+func (k *Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists bool) {
 	// Get the secret object
 	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
 	if err != nil {
@@ -87,7 +87,11 @@ func (k Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists 
 	kubeSecretExists = true
 	return
 }
-func (k Config) GetLastUpdatedDate() (date time.Time, err error) {
+func (k *Config) GetLastUpdatedDate() (date time.Time, err error) {
+	err = k.authenticate()
+	if err != nil {
+		return date, err
+	}
 	secretObject, kubeSecretExists := k.getSecretObject()
 	if !kubeSecretExists {
 		return date, nil
@@ -105,12 +109,12 @@ func (k Config) GetLastUpdatedDate() (date time.Time, err error) {
 }
 
 // PostSecrets is common interface function to post secrets to destination
-func (k Config) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
+func (k *Config) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
 	err = k.authenticate()
 	if err != nil {
 		return err
 	}
-	err = k.SecretsUpdater(secretList)
+	err = k.secretsUpdater(secretList)
 	if err != nil {
 		return err
 	}

@@ -69,7 +69,7 @@ func selectConsumer() (destination consumer.Consumers) {
 		if len(secretName) == 0 {
 			secretName = vaultName
 		}
-		destination = kubernetes.Config{
+		destination = &kubernetes.Config{
 			SecretName: secretName,
 			Namespace:  namespace,
 		}
