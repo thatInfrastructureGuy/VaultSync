@@ -9,6 +9,7 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/aws/secretsmanager"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/azure/keyvault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/local"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
@@ -52,6 +53,8 @@ func selectProvider(lastUpdated time.Time) (vault vault.Vaults) {
 		os.Exit(1)
 	case "hashicorp":
 		os.Exit(1)
+	case "local":
+		vault = &local.Local{DestinationLastUpdated: lastUpdated}
 	default:
 		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
 		os.Exit(1)

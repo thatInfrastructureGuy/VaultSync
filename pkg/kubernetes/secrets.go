@@ -64,7 +64,7 @@ func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) erro
 	}
 	// Set the date updated timestamp
 	annotations := make(map[string]string)
-	annotations["dateUpdated"] = time.Now().String()
+	annotations["dateUpdated"] = time.Now().Format(time.RFC3339)
 	secretObject.SetAnnotations(annotations)
 
 	if !kubeSecretExists {
