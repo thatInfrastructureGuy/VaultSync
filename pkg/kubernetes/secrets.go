@@ -62,6 +62,10 @@ func (k Config) SecretsUpdater(secretList map[string]data.SecretAttribute) error
 	for secretKey, secretAttributes := range secretList {
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 	}
+	// Set the date updated timestamp
+	annotations := make(map[string]string)
+	annotations["dateUpdated"] = time.Now().String()
+	secretObject.SetAnnotations(annotations)
 
 	if !kubeSecretExists {
 		return k.secretCreator(secretObject)
@@ -89,7 +93,7 @@ func (k Config) GetLastUpdatedDate() (date time.Time, err error) {
 		return date, nil
 	}
 	annotations := secretObject.GetAnnotations()
-	value, ok := annotations[""]
+	value, ok := annotations["dateUpdated"]
 	if !ok {
 		return date, nil
 	}
