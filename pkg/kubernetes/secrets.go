@@ -63,7 +63,10 @@ func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) erro
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 	}
 	// Set the date updated timestamp
-	annotations := make(map[string]string)
+	annotations := secretObject.GetAnnotations()
+	if len(annotations) == 0 {
+		annotations = make(map[string]string)
+	}
 	annotations["dateUpdated"] = time.Now().Format(time.RFC3339)
 	secretObject.SetAnnotations(annotations)
 
