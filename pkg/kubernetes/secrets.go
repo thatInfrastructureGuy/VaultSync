@@ -58,7 +58,9 @@ func (k *Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) error {
 	secretObject, kubeSecretExists := k.getSecretObject()
 	// Instantiate secret data
-	secretObject.Data = make(map[string][]byte)
+	if len(secretObject.Data) == 0 {
+		secretObject.Data = make(map[string][]byte)
+	}
 	for secretKey, secretAttributes := range secretList {
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 	}
