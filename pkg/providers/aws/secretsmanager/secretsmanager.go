@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -15,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/providers/checks"
 )
 
 type SecretsManager struct {
@@ -22,17 +24,17 @@ type SecretsManager struct {
 	DestinationLastUpdated time.Time
 }
 
-func (o *SecretsManager) listSecrets(secretName string) (err error) {
+func (s *SecretsManager) listSecrets(vaultName string) (err error) {
 	//Create a Secrets Manager client
 	svc := secretsmanager.New(session.New())
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(secretName),
+		SecretId:     aws.String(vaultName),
 		VersionStage: aws.String("AWSCURRENT"), // VersionStage defaults to AWSCURRENT if unspecified
 	}
 
 	// In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
 	// See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-	o.result, err = svc.GetSecretValue(input)
+	s.result, err = svc.GetSecretValue(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -66,13 +68,14 @@ func (o *SecretsManager) listSecrets(secretName string) (err error) {
 	return nil
 }
 
-func (o *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
+func (s *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
 	secretList := make(map[string]data.SecretAttribute)
-	err := o.listSecrets("devtest1")
+	vaultName := os.Getenv("VAULT_NAME")
+	err := s.listSecrets(vaultName)
 	if err != nil {
 		return nil, err
 	}
-	secrets, err := o.getSecretValuesJson()
+	secrets, err := s.getSecretValuesJson()
 	if err != nil {
 		return nil, err
 	}
@@ -81,26 +84,32 @@ func (o *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
 	if err != nil {
 		return nil, err
 	}
-	for key, valueInterface := range keyvalue {
+	for secretName, valueInterface := range keyvalue {
+		//Checks against key metadata
+		dateUpdated := *s.result.CreatedDate
+		secretName, skipUpdate := checks.CommonProviderChecks(secretName, dateUpdated, s.DestinationLastUpdated)
+		if skipUpdate {
+			break
+		}
 		value := fmt.Sprintf("%v", valueInterface)
-		secretList[key] = data.SecretAttribute{
+		secretList[secretName] = data.SecretAttribute{
 			Value:       value,
-			DateUpdated: *o.result.CreatedDate,
+			DateUpdated: dateUpdated,
 		}
 	}
 	return secretList, nil
 }
 
-func (o *SecretsManager) getSecretValuesJson() (secretsJson string, err error) {
+func (s *SecretsManager) getSecretValuesJson() (secretsJson string, err error) {
 	// Decrypts secret using the associated KMS CMK.
 	// Depending on whether the secret is a string or binary, one of these fields will be populated.
 	var secretString, decodedBinarySecret string
-	if o.result.SecretString != nil {
-		secretString = *o.result.SecretString
+	if s.result.SecretString != nil {
+		secretString = *s.result.SecretString
 		return secretString, nil
 	}
-	decodedBinarySecretBytes := make([]byte, base64.StdEncoding.DecodedLen(len(o.result.SecretBinary)))
-	length, err := base64.StdEncoding.Decode(decodedBinarySecretBytes, o.result.SecretBinary)
+	decodedBinarySecretBytes := make([]byte, base64.StdEncoding.DecodedLen(len(s.result.SecretBinary)))
+	length, err := base64.StdEncoding.Decode(decodedBinarySecretBytes, s.result.SecretBinary)
 	if err != nil {
 		fmt.Println("Base64 Decode Error:", err)
 		return "", err

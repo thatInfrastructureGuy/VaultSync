@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/providers/checks"
 )
 
 // listSecrets Get all the secrets from specified keyvault
 func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, err error) {
 	ctx := context.Background()
+	vaultName := os.Getenv("VAULT_NAME")
 	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
 	if err != nil {
 		fmt.Printf("unable to get list of secrets: %v\n", err)
@@ -33,7 +34,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 			dateUpdated := time.Time(*secretProperties.Attributes.Updated)
 
 			//Checks against key metadata
-			secretName, skipUpdate := CommonProviderChecks(secretName, dateUpdated, k.DestinationLastUpdated)
+			secretName, skipUpdate := checks.CommonProviderChecks(secretName, dateUpdated, k.DestinationLastUpdated)
 			if skipUpdate {
 				continue
 			}
@@ -92,21 +93,6 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (skipUpdate bool
 		skipUpdate = true
 	}
 	return skipUpdate
-}
-
-func CommonProviderChecks(originalSecretName string, sourceDate time.Time, destinationDate time.Time) (updatedSecretName string, skipUpdate bool) {
-	// Set updatedName as original name
-	updatedSecretName = originalSecretName
-	// Check if destination keys are outdated.
-	if !sourceDate.After(destinationDate) {
-		fmt.Printf("%v key is not updated since %v . Skipping update.", originalSecretName, sourceDate)
-		skipUpdate = true
-	}
-	// Check if ALL hyphers should be converted to underscores
-	if convertHyphenToUnderscores == "true" {
-		updatedSecretName = strings.ReplaceAll(originalSecretName, "-", "_")
-	}
-	return updatedSecretName, skipUpdate
 }
 
 // Get SecretValue from KeyVault if Secret is enabled.

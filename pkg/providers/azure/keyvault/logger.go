@@ -11,7 +11,7 @@ import (
 )
 
 func (k *Keyvault) logger() {
-	setDebug = strings.ToLower(os.Getenv("DEBUG"))
+	setDebug := strings.ToLower(os.Getenv("DEBUG"))
 	if strings.ToLower(setDebug) == "true" {
 		k.basicClient.RequestInspector = logRequest()
 		k.basicClient.ResponseInspector = logResponse()
