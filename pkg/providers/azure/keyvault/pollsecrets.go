@@ -2,7 +2,7 @@ package keyvault
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -18,8 +18,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 	vaultName := os.Getenv("VAULT_NAME")
 	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
 	if err != nil {
-		fmt.Printf("unable to get list of secrets: %v\n", err)
-		os.Exit(1)
+		log.Fatal("unable to get list of secrets: %v\n", err)
 	}
 
 	secretList = make(map[string]data.SecretAttribute)
@@ -58,7 +57,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 
 		err = secretItr.NextWithContext(ctx)
 		if err != nil {
-			fmt.Println("unable to get next page for list of secrets.")
+			log.Println("unable to get next page for list of secrets.")
 			return nil, err
 		}
 	}
@@ -67,13 +66,11 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 }
 
 func customProviderChecks(secretProperties keyvault.SecretItem) (markForDeletion bool) {
-	secretName := path.Base(*secretProperties.ID)
 	currentTimeUTC := time.Now().UTC()
 	// Check Activation date
 	if secretProperties.Attributes.NotBefore != nil {
 		activationDate := time.Time(*secretProperties.Attributes.NotBefore)
 		if activationDate.After(currentTimeUTC) {
-			fmt.Printf("%v key is not activated yet\n", secretName)
 			markForDeletion = true
 		}
 	}
@@ -82,7 +79,6 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (markForDeletion
 	if secretProperties.Attributes.Expires != nil {
 		expiryDate := time.Time(*secretProperties.Attributes.Expires)
 		if expiryDate.Before(currentTimeUTC) {
-			fmt.Printf("%v key has expired\n", secretName)
 			markForDeletion = true
 		}
 	}
@@ -100,7 +96,7 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (markForDeletion
 func (k *Keyvault) getSecretValue(vaultName string, secretName string) (value string, err error) {
 	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
 	if err != nil {
-		fmt.Println("unable to get value for secret")
+		log.Println("unable to get value for secret")
 		return "", err
 	}
 

@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
@@ -33,10 +33,10 @@ func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
 	if err != nil {
-		fmt.Println("Error updating secret: ", err)
+		log.Println("Error updating secret: ", err)
 		return err
 	}
-	fmt.Printf("Updated secret %q.\n", secretOut.GetObjectMeta().GetName())
+	log.Printf("Updated secret %q.\n", secretOut.GetObjectMeta().GetName())
 	return nil
 }
 
@@ -47,10 +47,10 @@ func (k *Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 	namespace := secretObject.GetNamespace()
 	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
 	if err != nil {
-		fmt.Println("Error creating secret: ", err)
+		log.Println("Error creating secret: ", err)
 		return err
 	}
-	fmt.Printf("Created secret %q.\n", secretOut.GetObjectMeta().GetName())
+	log.Printf("Created secret %q.\n", secretOut.GetObjectMeta().GetName())
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (k *Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists
 	// Get the secret object
 	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		kubeSecretExists = false
 
 		// Create kube secret empty object
