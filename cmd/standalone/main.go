@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -15,30 +15,27 @@ import (
 
 func main() {
 	if os.Getenv("PROVIDER") == "" || os.Getenv("VAULT_NAME") == "" || os.Getenv("SECRETS_NAMESPACE") == "" {
-		fmt.Println("Required Env Vars not set, exiting...")
-		os.Exit(1)
+		log.Fatal("Required Env Vars not set, exiting...")
 	}
 
 	// Get lastUpdated date timestamp from consumer
 	destination := selectConsumer()
 	destinationlastUpdated, err := destination.GetLastUpdatedDate()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	// Poll secrets from vault which were updated since lastUpdated value
 	vault := selectProvider(destinationlastUpdated)
 	secretList, err := vault.GetSecrets()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	// Update kuberenetes secrets
 	err = destination.PostSecrets(secretList)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
@@ -50,14 +47,13 @@ func selectProvider(lastUpdated time.Time) (vaultInstance vault.Vault) {
 	case "aws":
 		vaultInstance = vault.Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated}}
 	case "gcp":
-		os.Exit(1)
+		log.Fatal("Google Secrets Manager: Not implemented yet!")
 	case "hashicorp":
-		os.Exit(1)
+		log.Fatal("Hashicorp Vault: Not implemented yet!")
 	case "local":
 		vaultInstance = vault.Vault{&local.Local{DestinationLastUpdated: lastUpdated}}
 	default:
-		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
-		os.Exit(1)
+		log.Fatal("Please specify valid vault provider: azure, aws. (Coming soon: gcp, hashicorp)")
 	}
 	return vaultInstance
 }
@@ -77,8 +73,7 @@ func selectConsumer() (destination consumer.Consumer) {
 			Namespace:  namespace,
 		}}
 	default:
-		fmt.Println("No consumer provided.")
-		os.Exit(1)
+		log.Fatal("No consumer provided.")
 	}
 
 	return destination
