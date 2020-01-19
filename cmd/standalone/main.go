@@ -34,6 +34,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("------------------------")
+	fmt.Println(secretList)
+	fmt.Println("------------------------")
 	// Update kuberenetes secrets
 	err = destination.PostSecrets(secretList)
 	if err != nil {

@@ -84,10 +84,10 @@ func (s *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
 	if err != nil {
 		return nil, err
 	}
-	for secretName, valueInterface := range keyvalue {
+	for originalSecretName, valueInterface := range keyvalue {
 		//Checks against key metadata
 		dateUpdated := *s.result.CreatedDate
-		secretName, skipUpdate := checks.CommonProviderChecks(secretName, dateUpdated, s.DestinationLastUpdated)
+		secretName, skipUpdate := checks.CommonProviderChecks(originalSecretName, dateUpdated, s.DestinationLastUpdated)
 		if skipUpdate {
 			break
 		}

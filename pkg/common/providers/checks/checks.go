@@ -12,7 +12,7 @@ func CommonProviderChecks(originalSecretName string, sourceDate time.Time, desti
 	updatedSecretName = originalSecretName
 	// Check if destination keys are outdated.
 	if !sourceDate.After(destinationDate) {
-		fmt.Printf("%v key is not updated since %v . Skipping update.", originalSecretName, sourceDate)
+		fmt.Printf("%v key is not updated since %v . Skipping update.\n", originalSecretName, sourceDate)
 		skipUpdate = true
 	}
 	// Check if ALL hyphers should be converted to underscores

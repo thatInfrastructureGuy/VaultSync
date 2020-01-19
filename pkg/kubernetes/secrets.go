@@ -63,6 +63,10 @@ func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) erro
 	}
 	for secretKey, secretAttributes := range secretList {
 		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
+		//Delete the key if set to empty
+		if secretAttributes.Value == "" || secretAttributes.MarkedForDeletion {
+			delete(secretObject.Data, secretKey)
+		}
 	}
 	// Set the date updated timestamp
 	annotations := secretObject.GetAnnotations()

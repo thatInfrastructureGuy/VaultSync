@@ -30,29 +30,29 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 		}
 
 		for _, secretProperties := range secretItr.Values() {
-			secretName := path.Base(*secretProperties.ID)
+			originalSecretName := path.Base(*secretProperties.ID)
 			dateUpdated := time.Time(*secretProperties.Attributes.Updated)
 
 			//Checks against key metadata
-			secretName, skipUpdate := checks.CommonProviderChecks(secretName, dateUpdated, k.DestinationLastUpdated)
-			if skipUpdate {
-				continue
-			}
-			skipUpdate = customProviderChecks(secretProperties)
-			if skipUpdate {
-				continue
-			}
+			updatedSecretName, skipUpdate := checks.CommonProviderChecks(originalSecretName, dateUpdated, k.DestinationLastUpdated)
+			markForDeletion := customProviderChecks(secretProperties)
 
 			//Get Secret Values
-			secretValue, err := k.getSecretValue(secretName)
-			if err != nil {
-				return nil, err
+			var secretValue string
+			if !markForDeletion {
+				secretValue, err = k.getSecretValue(vaultName, originalSecretName)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			//Create Key-Value map
-			secretList[secretName] = data.SecretAttribute{
-				DateUpdated: dateUpdated,
-				Value:       secretValue,
+			if !skipUpdate {
+				secretList[updatedSecretName] = data.SecretAttribute{
+					DateUpdated:       dateUpdated,
+					Value:             secretValue,
+					MarkedForDeletion: markForDeletion,
+				}
 			}
 		}
 
@@ -66,7 +66,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 	return secretList, nil
 }
 
-func customProviderChecks(secretProperties keyvault.SecretItem) (skipUpdate bool) {
+func customProviderChecks(secretProperties keyvault.SecretItem) (markForDeletion bool) {
 	secretName := path.Base(*secretProperties.ID)
 	currentTimeUTC := time.Now().UTC()
 	// Check Activation date
@@ -74,7 +74,7 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (skipUpdate bool
 		activationDate := time.Time(*secretProperties.Attributes.NotBefore)
 		if activationDate.After(currentTimeUTC) {
 			fmt.Printf("%v key is not activated yet\n", secretName)
-			skipUpdate = true
+			markForDeletion = true
 		}
 	}
 
@@ -83,21 +83,21 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (skipUpdate bool
 		expiryDate := time.Time(*secretProperties.Attributes.Expires)
 		if expiryDate.Before(currentTimeUTC) {
 			fmt.Printf("%v key has expired\n", secretName)
-			skipUpdate = true
+			markForDeletion = true
 		}
 	}
 
 	// Check if secret is disabled.
 	isEnabled := *secretProperties.Attributes.Enabled
 	if !isEnabled {
-		skipUpdate = true
+		markForDeletion = true
 	}
-	return skipUpdate
+	return markForDeletion
 }
 
 // Get SecretValue from KeyVault if Secret is enabled.
 // If secret is disabled, return empty string.
-func (k *Keyvault) getSecretValue(secretName string) (value string, err error) {
+func (k *Keyvault) getSecretValue(vaultName string, secretName string) (value string, err error) {
 	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
 	if err != nil {
 		fmt.Println("unable to get value for secret")
