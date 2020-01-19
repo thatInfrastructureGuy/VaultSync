@@ -9,13 +9,15 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// Kubeconfig contains the auth creds
-type Kubeconfig struct {
-	clientset *kubernetes.Clientset
+// Config contains the kubernetes clientset and configs.
+type Config struct {
+	clientset  *kubernetes.Clientset
+	SecretName string
+	Namespace  string
 }
 
-// Authenticate authenticates client.
-func (k *Kubeconfig) Authenticate() (err error) {
+// authenticate authenticates and authorizes the client.
+func (k *Config) authenticate() (err error) {
 	var config *rest.Config
 	kubeconfigPath := os.Getenv("KUBECONFIG")
 	if len(kubeconfigPath) > 0 {

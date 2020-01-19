@@ -6,7 +6,7 @@ CGO_ENABLED=0 go build -a -trimpath -tags netgo -ldflags '-s -w -extldflags "-st
 export  AZURE_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 export 	AZURE_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 export 	AZURE_CLIENT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-export  KVAULT=mykeyvault
+export  VAULT_NAME=mykeyvault
 
 # Use metadata.namespace from downward API when running in cluster
 export 	SECRETS_NAMESPACE=mynamespace
@@ -19,7 +19,7 @@ export  KUBECONFIG=/home/johnsmith/.kube/config
 # Make sure to use only hyphens or only underscores in environment variables. Using both is NOT supported.
 export 	CONVERT_HYPHENS_TO_UNDERSCORES=true
 
-# Skip if you want SECRET_NAME = KVAULT
+# Skip if you want SECRET_NAME = VAULT_NAME
 export  SECRET_NAME=mysecret
 
 # Debugs Keyvault requests/responses
