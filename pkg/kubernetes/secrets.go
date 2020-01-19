@@ -36,7 +36,6 @@ func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 		log.Println("Error updating secret: ", err)
 		return err
 	}
-	log.Printf("Updated secret %q.\n", secretOut.GetObjectMeta().GetName())
 	return nil
 }
 
@@ -50,7 +49,6 @@ func (k *Config) secretCreator(secretObject *apiv1.Secret) (err error) {
 		log.Println("Error creating secret: ", err)
 		return err
 	}
-	log.Printf("Created secret %q.\n", secretOut.GetObjectMeta().GetName())
 	return nil
 }
 
