@@ -21,7 +21,6 @@ func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err 
 		fmt.Println("Nothing to update!")
 		return nil
 	}
-	fmt.Println(secretList)
 	return c.Destination.PostSecrets(secretList)
 }
 

@@ -34,9 +34,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("------------------------")
-	fmt.Println(secretList)
-	fmt.Println("------------------------")
 	// Update kuberenetes secrets
 	err = destination.PostSecrets(secretList)
 	if err != nil {
@@ -45,27 +42,27 @@ func main() {
 	}
 }
 
-func selectProvider(lastUpdated time.Time) (vault vault.Vaults) {
+func selectProvider(lastUpdated time.Time) (vaultInstance vault.Vault) {
 	provider := os.Getenv("PROVIDER")
 	switch provider {
 	case "azure":
-		vault = &keyvault.Keyvault{DestinationLastUpdated: lastUpdated}
+		vaultInstance = vault.Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated}}
 	case "aws":
-		vault = &secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated}
+		vaultInstance = vault.Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated}}
 	case "gcp":
 		os.Exit(1)
 	case "hashicorp":
 		os.Exit(1)
 	case "local":
-		vault = &local.Local{DestinationLastUpdated: lastUpdated}
+		vaultInstance = vault.Vault{&local.Local{DestinationLastUpdated: lastUpdated}}
 	default:
 		fmt.Println("Please specify valid vault provider: azure, aws, gcp, hashicorp")
 		os.Exit(1)
 	}
-	return vault
+	return vaultInstance
 }
 
-func selectConsumer() (destination consumer.Consumers) {
+func selectConsumer() (destination consumer.Consumer) {
 	consumerType := os.Getenv("CONSUMER")
 	switch consumerType {
 	case "kubernetes":
@@ -75,10 +72,10 @@ func selectConsumer() (destination consumer.Consumers) {
 		if len(secretName) == 0 {
 			secretName = vaultName
 		}
-		destination = &kubernetes.Config{
+		destination = consumer.Consumer{&kubernetes.Config{
 			SecretName: secretName,
 			Namespace:  namespace,
-		}
+		}}
 	default:
 		fmt.Println("No consumer provided.")
 		os.Exit(1)
