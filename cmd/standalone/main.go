@@ -9,8 +9,7 @@ import (
 
 func main() {
 	// Select the destination
-	destination := consumer.Consumer{}
-	err := destination.SelectConsumer()
+	destination, err := consumer.SelectConsumer()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,8 +21,7 @@ func main() {
 	}
 
 	// Select the source
-	source := vault.Vault{}
-	err = source.SelectProvider(destinationlastUpdated)
+	source, err := vault.SelectProvider(destinationlastUpdated)
 	if err != nil {
 		log.Fatal(err)
 	}

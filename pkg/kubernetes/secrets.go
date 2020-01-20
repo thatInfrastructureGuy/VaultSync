@@ -10,28 +10,26 @@ import (
 )
 
 // createSecretObject creates a Kubernetes Secret Object in memory.
-func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secret) {
-	secretObject = &apiv1.Secret{
+func (k *Config) createSecretObject() {
+	k.secretObject = &apiv1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: namespace,
+			Name:      k.SecretName,
+			Namespace: k.Namespace,
 		},
 		Type: "Opaque",
 	}
-
-	return
 }
 
 // secretUpdater updates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
-	namespace := secretObject.GetNamespace()
-	_, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
+func (k *Config) secretUpdater() error {
+	namespace := k.secretObject.GetNamespace()
+	_, err := k.clientset.CoreV1().Secrets(namespace).Update(k.secretObject)
 	if err != nil {
 		log.Println("Error updating secret: ", err)
 		return err
@@ -42,9 +40,9 @@ func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 // secretCreator creates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k *Config) secretCreator(secretObject *apiv1.Secret) error {
-	namespace := secretObject.GetNamespace()
-	_, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
+func (k *Config) secretCreator() error {
+	namespace := k.secretObject.GetNamespace()
+	_, err := k.clientset.CoreV1().Secrets(namespace).Create(k.secretObject)
 	if err != nil {
 		log.Println("Error creating secret: ", err)
 		return err
@@ -54,56 +52,55 @@ func (k *Config) secretCreator(secretObject *apiv1.Secret) error {
 
 // secretsUpdater is an internal wrapper over kube secret operations.
 func (k *Config) secretsUpdater(secretList map[string]data.SecretAttribute) error {
-	secretObject, kubeSecretExists := k.getSecretObject()
 	// Instantiate secret data
-	if len(secretObject.Data) == 0 {
-		secretObject.Data = make(map[string][]byte)
+	if len(k.secretObject.Data) == 0 {
+		k.secretObject.Data = make(map[string][]byte)
 	}
 	for secretKey, secretAttributes := range secretList {
-		secretObject.Data[secretKey] = []byte(secretAttributes.Value)
+		k.secretObject.Data[secretKey] = []byte(secretAttributes.Value)
 		//Delete the key if set to empty
 		if secretAttributes.Value == "" || secretAttributes.MarkedForDeletion {
-			delete(secretObject.Data, secretKey)
+			delete(k.secretObject.Data, secretKey)
 		}
 	}
 	// Set the date updated timestamp
-	annotations := secretObject.GetAnnotations()
+	annotations := k.secretObject.GetAnnotations()
 	if len(annotations) == 0 {
 		annotations = make(map[string]string)
 	}
 	annotations["dateUpdated"] = time.Now().Format(time.RFC3339)
-	secretObject.SetAnnotations(annotations)
+	k.secretObject.SetAnnotations(annotations)
 
-	if !kubeSecretExists {
-		return k.secretCreator(secretObject)
+	if !k.KubeSecretExists {
+		return k.secretCreator()
 	}
-	return k.secretUpdater(secretObject)
+	return k.secretUpdater()
 }
 
-func (k *Config) getSecretObject() (secretObject *apiv1.Secret, kubeSecretExists bool) {
+func (k *Config) getSecretObject() {
+	var err error
 	// Get the secret object
-	secretObject, err := k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
+	k.secretObject, err = k.clientset.CoreV1().Secrets(k.Namespace).Get(k.SecretName, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
-		kubeSecretExists = false
+		k.KubeSecretExists = false
 
 		// Create kube secret empty object
-		secretObject = createSecretObject(k.SecretName, k.Namespace)
-		return
+		k.createSecretObject()
 	}
-	kubeSecretExists = true
-	return
+	k.KubeSecretExists = true
 }
+
 func (k *Config) GetLastUpdatedDate() (date time.Time, err error) {
 	err = k.authenticate()
 	if err != nil {
 		return date, err
 	}
-	secretObject, kubeSecretExists := k.getSecretObject()
-	if !kubeSecretExists {
+	k.getSecretObject()
+	if !k.KubeSecretExists {
 		return date, nil
 	}
-	annotations := secretObject.GetAnnotations()
+	annotations := k.secretObject.GetAnnotations()
 	value, ok := annotations["dateUpdated"]
 	if !ok {
 		return date, nil

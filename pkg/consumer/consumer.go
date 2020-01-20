@@ -31,10 +31,10 @@ func (c *Consumer) GetLastUpdatedDate() (date time.Time, err error) {
 	return c.Destination.GetLastUpdatedDate()
 }
 
-func (c *Consumer) SelectConsumer() error {
+func SelectConsumer() (c *Consumer, err error) {
 	consumerType, ok := os.LookupEnv("CONSUMER")
 	if !ok {
-		return errors.New("CONSUMER env var not present")
+		return nil, errors.New("CONSUMER env var not present")
 	}
 	vaultName := os.Getenv("VAULT_NAME")
 	switch consumerType {
@@ -48,14 +48,14 @@ func (c *Consumer) SelectConsumer() error {
 			secretName = vaultName
 		}
 		if secretName == "" {
-			errors.New("Invalid secret name!")
+			return nil, errors.New("Invalid secret name!")
 		}
 		c = &Consumer{&kubernetes.Config{
 			SecretName: secretName,
 			Namespace:  namespace,
 		}}
-		return nil
 	default:
-		return errors.New("No consumer provided.")
+		return nil, errors.New("No consumer provided.")
 	}
+	return c, nil
 }

@@ -23,14 +23,14 @@ func (v *Vault) GetSecrets() (map[string]data.SecretAttribute, error) {
 	return v.Provider.GetSecrets()
 }
 
-func (v *Vault) SelectProvider(lastUpdated time.Time) error {
+func SelectProvider(lastUpdated time.Time) (v *Vault, err error) {
 	provider, ok := os.LookupEnv("PROVIDER")
 	if !ok {
-		return errors.New("PROVIDER env not present")
+		return nil, errors.New("PROVIDER env not present")
 	}
 	vaultName, ok := os.LookupEnv("VAULT_NAME")
 	if !ok {
-		return errors.New("VAULT_NAME env not present")
+		return nil, errors.New("VAULT_NAME env not present")
 	}
 	switch provider {
 	case "azure":
@@ -38,13 +38,13 @@ func (v *Vault) SelectProvider(lastUpdated time.Time) error {
 	case "aws":
 		v = &Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
 	case "gcp":
-		return errors.New("Google Secrets Manager: Not implemented yet!")
+		return nil, errors.New("Google Secrets Manager: Not implemented yet!")
 	case "hashicorp":
-		return errors.New("Hashicorp Vault: Not implemented yet!")
+		return nil, errors.New("Hashicorp Vault: Not implemented yet!")
 	case "local":
 		v = &Vault{&local.Local{DestinationLastUpdated: lastUpdated}}
 	default:
-		return errors.New("Please specify valid vault provider: azure, aws. (Coming soon: gcp, hashicorp)")
+		return nil, errors.New("Please specify valid vault provider: azure, aws. (Coming soon: gcp, hashicorp)")
 	}
-	return nil
+	return v, nil
 }
