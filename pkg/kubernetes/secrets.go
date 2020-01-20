@@ -31,7 +31,7 @@ func createSecretObject(secretName, namespace string) (secretObject *apiv1.Secre
 // Errors out if namespace is not present.
 func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 	namespace := secretObject.GetNamespace()
-	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
+	_, err := k.clientset.CoreV1().Secrets(namespace).Update(secretObject)
 	if err != nil {
 		log.Println("Error updating secret: ", err)
 		return err
@@ -42,9 +42,9 @@ func (k *Config) secretUpdater(secretObject *apiv1.Secret) error {
 // secretCreator creates secrets into specified Kubernetes Secret
 // If secret name not specified; secret with same name as vault is created.
 // Errors out if namespace is not present.
-func (k *Config) secretCreator(secretObject *apiv1.Secret) (err error) {
+func (k *Config) secretCreator(secretObject *apiv1.Secret) error {
 	namespace := secretObject.GetNamespace()
-	secretOut, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
+	_, err := k.clientset.CoreV1().Secrets(namespace).Create(secretObject)
 	if err != nil {
 		log.Println("Error creating secret: ", err)
 		return err

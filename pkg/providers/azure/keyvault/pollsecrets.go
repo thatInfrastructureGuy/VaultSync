@@ -2,8 +2,6 @@ package keyvault
 
 import (
 	"context"
-	"log"
-	"os"
 	"path"
 	"time"
 
@@ -15,10 +13,9 @@ import (
 // listSecrets Get all the secrets from specified keyvault
 func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, err error) {
 	ctx := context.Background()
-	vaultName := os.Getenv("VAULT_NAME")
-	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+vaultName+".vault.azure.net", nil)
+	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+k.VaultName+".vault.azure.net", nil)
 	if err != nil {
-		log.Fatal("unable to get list of secrets: %v\n", err)
+		return nil, err
 	}
 
 	secretList = make(map[string]data.SecretAttribute)
@@ -39,7 +36,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 			//Get Secret Values
 			var secretValue string
 			if !markForDeletion {
-				secretValue, err = k.getSecretValue(vaultName, originalSecretName)
+				secretValue, err = k.getSecretValue(originalSecretName)
 				if err != nil {
 					return nil, err
 				}
@@ -57,7 +54,6 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 
 		err = secretItr.NextWithContext(ctx)
 		if err != nil {
-			log.Println("unable to get next page for list of secrets.")
 			return nil, err
 		}
 	}
@@ -93,10 +89,9 @@ func customProviderChecks(secretProperties keyvault.SecretItem) (markForDeletion
 
 // Get SecretValue from KeyVault if Secret is enabled.
 // If secret is disabled, return empty string.
-func (k *Keyvault) getSecretValue(vaultName string, secretName string) (value string, err error) {
-	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+vaultName+".vault.azure.net", secretName, "")
+func (k *Keyvault) getSecretValue(secretName string) (value string, err error) {
+	secretResp, err := k.basicClient.GetSecret(context.Background(), "https://"+k.VaultName+".vault.azure.net", secretName, "")
 	if err != nil {
-		log.Println("unable to get value for secret")
 		return "", err
 	}
 
