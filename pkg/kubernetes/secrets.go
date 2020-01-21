@@ -87,8 +87,10 @@ func (k *Config) getSecretObject() {
 
 		// Create kube secret empty object
 		k.createSecretObject()
+		return
 	}
 	k.KubeSecretExists = true
+	return
 }
 
 func (k *Config) GetLastUpdatedDate() (date time.Time, err error) {
@@ -114,10 +116,6 @@ func (k *Config) GetLastUpdatedDate() (date time.Time, err error) {
 
 // PostSecrets is common interface function to post secrets to destination
 func (k *Config) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
-	err = k.authenticate()
-	if err != nil {
-		return err
-	}
 	err = k.secretsUpdater(secretList)
 	if err != nil {
 		return err
