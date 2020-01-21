@@ -10,6 +10,7 @@ import (
 type Keyvault struct {
 	basicClient            keyvault.BaseClient
 	DestinationLastUpdated time.Time
+	VaultName              string
 }
 
 // initialize creates KeyVault instance

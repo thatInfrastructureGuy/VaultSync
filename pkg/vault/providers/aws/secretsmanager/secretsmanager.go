@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,13 +21,14 @@ import (
 type SecretsManager struct {
 	result                 *secretsmanager.GetSecretValueOutput
 	DestinationLastUpdated time.Time
+	VaultName              string
 }
 
-func (s *SecretsManager) listSecrets(vaultName string) (err error) {
+func (s *SecretsManager) listSecrets() (err error) {
 	//Create a Secrets Manager client
 	svc := secretsmanager.New(session.New())
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(vaultName),
+		SecretId:     aws.String(s.VaultName),
 		VersionStage: aws.String("AWSCURRENT"), // VersionStage defaults to AWSCURRENT if unspecified
 	}
 
@@ -58,10 +58,6 @@ func (s *SecretsManager) listSecrets(vaultName string) (err error) {
 				// We can't find the resource that you asked for.
 				fmt.Println(secretsmanager.ErrCodeResourceNotFoundException, aerr.Error())
 			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
 		}
 		return err
 	}
@@ -70,8 +66,7 @@ func (s *SecretsManager) listSecrets(vaultName string) (err error) {
 
 func (s *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
 	secretList := make(map[string]data.SecretAttribute)
-	vaultName := os.Getenv("VAULT_NAME")
-	err := s.listSecrets(vaultName)
+	err := s.listSecrets()
 	if err != nil {
 		return nil, err
 	}

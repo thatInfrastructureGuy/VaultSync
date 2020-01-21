@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -11,9 +12,11 @@ import (
 
 // Config contains the kubernetes clientset and configs.
 type Config struct {
-	clientset  *kubernetes.Clientset
-	SecretName string
-	Namespace  string
+	clientset        *kubernetes.Clientset
+	secretObject     *apiv1.Secret
+	SecretName       string
+	Namespace        string
+	KubeSecretExists bool
 }
 
 // authenticate authenticates and authorizes the client.
