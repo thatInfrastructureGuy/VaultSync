@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/kubernetes"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer/kubernetes"
 )
 
 type Consumers interface {

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/aws/secretsmanager"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/azure/keyvault"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/providers/local"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/aws/secretsmanager"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/azure/keyvault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/local"
 )
 
 type Vaults interface {
