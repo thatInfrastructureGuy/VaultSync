@@ -39,7 +39,7 @@ func SelectConsumer() (c *Consumer, err error) {
 	vaultName := os.Getenv("VAULT_NAME")
 	switch consumerType {
 	case "kubernetes":
-		namespace, ok := os.LookupEnv("SECRETS_NAMESPACE")
+		namespace, ok := os.LookupEnv("SECRET_NAMESPACE")
 		if !ok {
 			namespace = "default"
 		}

@@ -24,7 +24,7 @@ spec:
         env:
         - name: VAULT_NAME
           value: kvtestin
-        - name: SECRETS_NAMESPACE
+        - name: SECRET_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace

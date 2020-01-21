@@ -9,7 +9,7 @@ export 	AZURE_CLIENT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 export  VAULT_NAME=mykeyvault
 
 # Use metadata.namespace from downward API when running in cluster
-export 	SECRETS_NAMESPACE=mynamespace
+export 	SECRET_NAMESPACE=mynamespace
 
 # Required Locally. Not required when running in cluster
 export  KUBECONFIG=/home/johnsmith/.kube/config
