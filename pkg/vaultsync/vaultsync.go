@@ -3,20 +3,12 @@ package vaultsync
 import (
 	"log"
 
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
-type Env struct {
-	Provider                   string
-	VaultName                  string
-	ConsumerType               string
-	Namespace                  string
-	SecretName                 string
-	ConvertHyphenToUnderscores bool
-}
-
-func (e *Env) Synchronize() {
+func (e *data.Env) Synchronize() {
 	// Select the destination
 	destination, err := consumer.SelectConsumer()
 	if err != nil {

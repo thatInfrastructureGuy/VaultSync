@@ -3,7 +3,6 @@ package consumer
 import (
 	"errors"
 	"log"
-	"os"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
@@ -31,15 +30,15 @@ func (c *Consumer) GetLastUpdatedDate() (date time.Time, err error) {
 	return c.Destination.GetLastUpdatedDate()
 }
 
-func SelectConsumer() (c *Consumer, err error) {
-	switch consumerType {
+func SelectConsumer(env *data.Env) (c *Consumer, err error) {
+	switch env.ConsumerType {
 	case "kubernetes":
-		if secretName == "" {
+		if env.SecretName == "" {
 			return nil, errors.New("Invalid secret name!")
 		}
 		c = &Consumer{&kubernetes.Config{
-			SecretName: secretName,
-			Namespace:  namespace,
+			SecretName: env.SecretName,
+			Namespace:  env.Namespace,
 		}}
 	default:
 		return nil, errors.New("No consumer provided.")

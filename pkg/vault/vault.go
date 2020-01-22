@@ -2,7 +2,6 @@ package vault
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
@@ -23,12 +22,12 @@ func (v *Vault) GetSecrets() (map[string]data.SecretAttribute, error) {
 	return v.Provider.GetSecrets()
 }
 
-func SelectProvider(lastUpdated time.Time) (v *Vault, err error) {
-	switch provider {
+func SelectProvider(env *data.Env, lastUpdated time.Time) (v *Vault, err error) {
+	switch env.Provider {
 	case "azure":
-		v = &Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
+		v = &Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated, VaultName: env.VaultName}}
 	case "aws":
-		v = &Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
+		v = &Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated, VaultName: env.VaultName}}
 	case "gcp":
 		return nil, errors.New("Google Secrets Manager: Not implemented yet!")
 	case "hashicorp":
