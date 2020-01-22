@@ -11,15 +11,15 @@ import (
 )
 
 type Vaults interface {
-	GetSecrets() (map[string]data.SecretAttribute, error)
+	GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error)
 }
 
 type Vault struct {
 	Provider Vaults
 }
 
-func (v *Vault) GetSecrets() (map[string]data.SecretAttribute, error) {
-	return v.Provider.GetSecrets()
+func (v *Vault) GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error) {
+	return v.Provider.GetSecrets(env)
 }
 
 func SelectProvider(env *data.Env, lastUpdated time.Time) (v *Vault, err error) {

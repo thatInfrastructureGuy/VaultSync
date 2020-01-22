@@ -103,7 +103,7 @@ func (k *Keyvault) GetSecrets(env *data.Env) (secretList map[string]data.SecretA
 	if err != nil {
 		return nil, err
 	}
-	secretList, err = k.listSecrets(env * data.Env)
+	secretList, err = k.listSecrets(env)
 	if err != nil {
 		return nil, err
 	}
