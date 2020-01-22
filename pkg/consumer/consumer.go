@@ -32,21 +32,8 @@ func (c *Consumer) GetLastUpdatedDate() (date time.Time, err error) {
 }
 
 func SelectConsumer() (c *Consumer, err error) {
-	consumerType, ok := os.LookupEnv("CONSUMER")
-	if !ok {
-		return nil, errors.New("CONSUMER env var not present")
-	}
-	vaultName := os.Getenv("VAULT_NAME")
 	switch consumerType {
 	case "kubernetes":
-		namespace, ok := os.LookupEnv("SECRET_NAMESPACE")
-		if !ok {
-			namespace = "default"
-		}
-		secretName, ok := os.LookupEnv("SECRET_NAME")
-		if !ok {
-			secretName = vaultName
-		}
 		if secretName == "" {
 			return nil, errors.New("Invalid secret name!")
 		}

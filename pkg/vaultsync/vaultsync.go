@@ -7,7 +7,16 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
-func Synchronize() {
+type Env struct {
+	Provider                   string
+	VaultName                  string
+	ConsumerType               string
+	Namespace                  string
+	SecretName                 string
+	ConvertHyphenToUnderscores bool
+}
+
+func (e *Env) Synchronize() {
 	// Select the destination
 	destination, err := consumer.SelectConsumer()
 	if err != nil {

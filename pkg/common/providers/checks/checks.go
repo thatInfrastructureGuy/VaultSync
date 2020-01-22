@@ -14,7 +14,6 @@ func CommonProviderChecks(originalSecretName string, sourceDate time.Time, desti
 		skipUpdate = true
 	}
 	// Check if ALL hyphers should be converted to underscores
-	convertHyphenToUnderscores := strings.ToLower(os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES"))
 	if convertHyphenToUnderscores == "true" {
 		updatedSecretName = strings.ReplaceAll(originalSecretName, "-", "_")
 	}

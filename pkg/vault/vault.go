@@ -24,14 +24,6 @@ func (v *Vault) GetSecrets() (map[string]data.SecretAttribute, error) {
 }
 
 func SelectProvider(lastUpdated time.Time) (v *Vault, err error) {
-	provider, ok := os.LookupEnv("PROVIDER")
-	if !ok {
-		return nil, errors.New("PROVIDER env not present")
-	}
-	vaultName, ok := os.LookupEnv("VAULT_NAME")
-	if !ok {
-		return nil, errors.New("VAULT_NAME env not present")
-	}
 	switch provider {
 	case "azure":
 		v = &Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
