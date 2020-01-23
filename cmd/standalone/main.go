@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vaultsync"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/vaultsync"
 )
 
 func main() {

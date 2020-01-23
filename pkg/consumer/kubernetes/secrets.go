@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/common/data"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

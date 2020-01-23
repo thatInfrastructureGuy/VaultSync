@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/common/data"
 )
 
 func CommonProviderChecks(env *data.Env, originalSecretName string, sourceDate time.Time, destinationDate time.Time) (updatedSecretName string, skipUpdate bool) {
