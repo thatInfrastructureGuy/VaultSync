@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vaultsync"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vaultsync"
 )
 
 var env *data.Env

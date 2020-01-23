@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/providers/checks"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/providers/checks"
 )
 
 // listSecrets Get all the secrets from specified keyvault

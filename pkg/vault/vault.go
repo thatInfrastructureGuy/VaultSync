@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/aws/secretsmanager"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/azure/keyvault"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault/providers/local"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vault/providers/aws/secretsmanager"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vault/providers/azure/keyvault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vault/providers/local"
 )
 
 type Vaults interface {

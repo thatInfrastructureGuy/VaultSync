@@ -1,9 +1,9 @@
 package vaultsync
 
 import (
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/consumer"
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vault"
 )
 
 func Synchronize(env *data.Env) (error, bool) {
