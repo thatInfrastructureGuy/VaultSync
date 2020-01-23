@@ -18,12 +18,12 @@ type Consumer struct {
 	Destination Consumers
 }
 
-func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
+func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err error, updatedDestination bool) {
 	if len(secretList) == 0 {
 		log.Println("Nothing to update!")
-		return nil
+		return nil, false
 	}
-	return c.Destination.PostSecrets(secretList)
+	return c.Destination.PostSecrets(secretList), true
 }
 
 func (c *Consumer) GetLastUpdatedDate() (date time.Time, err error) {
