@@ -9,7 +9,7 @@ type Local struct {
 	DestinationLastUpdated time.Time
 }
 
-func (l *Local) GetSecrets() (map[string]data.SecretAttribute, error) {
+func (l *Local) GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error) {
 	sampleData := map[string]data.SecretAttribute{
 		"key1": {
 			DateUpdated: time.Now(),

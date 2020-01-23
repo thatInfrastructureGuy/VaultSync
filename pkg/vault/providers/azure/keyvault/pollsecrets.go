@@ -11,7 +11,7 @@ import (
 )
 
 // listSecrets Get all the secrets from specified keyvault
-func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, err error) {
+func (k *Keyvault) listSecrets(env *data.Env) (secretList map[string]data.SecretAttribute, err error) {
 	ctx := context.Background()
 	secretItr, err := k.basicClient.GetSecrets(ctx, "https://"+k.VaultName+".vault.azure.net", nil)
 	if err != nil {
@@ -30,7 +30,7 @@ func (k *Keyvault) listSecrets() (secretList map[string]data.SecretAttribute, er
 			dateUpdated := time.Time(*secretProperties.Attributes.Updated)
 
 			//Checks against key metadata
-			updatedSecretName, skipUpdate := checks.CommonProviderChecks(originalSecretName, dateUpdated, k.DestinationLastUpdated)
+			updatedSecretName, skipUpdate := checks.CommonProviderChecks(env, originalSecretName, dateUpdated, k.DestinationLastUpdated)
 			markForDeletion := customProviderChecks(secretProperties)
 
 			//Get Secret Values
@@ -98,12 +98,12 @@ func (k *Keyvault) getSecretValue(secretName string) (value string, err error) {
 	return *secretResp.Value, nil
 }
 
-func (k *Keyvault) GetSecrets() (secretList map[string]data.SecretAttribute, err error) {
+func (k *Keyvault) GetSecrets(env *data.Env) (secretList map[string]data.SecretAttribute, err error) {
 	err = k.initialize()
 	if err != nil {
 		return nil, err
 	}
-	secretList, err = k.listSecrets()
+	secretList, err = k.listSecrets(env)
 	if err != nil {
 		return nil, err
 	}

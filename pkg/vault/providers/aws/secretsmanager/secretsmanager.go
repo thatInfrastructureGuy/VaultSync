@@ -64,7 +64,7 @@ func (s *SecretsManager) listSecrets() (err error) {
 	return nil
 }
 
-func (s *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
+func (s *SecretsManager) GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error) {
 	secretList := make(map[string]data.SecretAttribute)
 	err := s.listSecrets()
 	if err != nil {
@@ -82,7 +82,7 @@ func (s *SecretsManager) GetSecrets() (map[string]data.SecretAttribute, error) {
 	for originalSecretName, valueInterface := range keyvalue {
 		//Checks against key metadata
 		dateUpdated := *s.result.CreatedDate
-		secretName, skipUpdate := checks.CommonProviderChecks(originalSecretName, dateUpdated, s.DestinationLastUpdated)
+		secretName, skipUpdate := checks.CommonProviderChecks(env, originalSecretName, dateUpdated, s.DestinationLastUpdated)
 		if skipUpdate {
 			break
 		}

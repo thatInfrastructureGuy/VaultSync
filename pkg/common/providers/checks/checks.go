@@ -1,12 +1,13 @@
 package checks
 
 import (
-	"os"
 	"strings"
 	"time"
+
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 )
 
-func CommonProviderChecks(originalSecretName string, sourceDate time.Time, destinationDate time.Time) (updatedSecretName string, skipUpdate bool) {
+func CommonProviderChecks(env *data.Env, originalSecretName string, sourceDate time.Time, destinationDate time.Time) (updatedSecretName string, skipUpdate bool) {
 	// Set updatedName as original name
 	updatedSecretName = originalSecretName
 	// Check if destination keys are outdated.
@@ -14,8 +15,7 @@ func CommonProviderChecks(originalSecretName string, sourceDate time.Time, desti
 		skipUpdate = true
 	}
 	// Check if ALL hyphers should be converted to underscores
-	convertHyphenToUnderscores := strings.ToLower(os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES"))
-	if convertHyphenToUnderscores == "true" {
+	if env.ConvertHyphenToUnderscores {
 		updatedSecretName = strings.ReplaceAll(originalSecretName, "-", "_")
 	}
 	return updatedSecretName, skipUpdate

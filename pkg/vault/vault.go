@@ -2,7 +2,6 @@ package vault
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
@@ -12,31 +11,23 @@ import (
 )
 
 type Vaults interface {
-	GetSecrets() (map[string]data.SecretAttribute, error)
+	GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error)
 }
 
 type Vault struct {
 	Provider Vaults
 }
 
-func (v *Vault) GetSecrets() (map[string]data.SecretAttribute, error) {
-	return v.Provider.GetSecrets()
+func (v *Vault) GetSecrets(env *data.Env) (map[string]data.SecretAttribute, error) {
+	return v.Provider.GetSecrets(env)
 }
 
-func SelectProvider(lastUpdated time.Time) (v *Vault, err error) {
-	provider, ok := os.LookupEnv("PROVIDER")
-	if !ok {
-		return nil, errors.New("PROVIDER env not present")
-	}
-	vaultName, ok := os.LookupEnv("VAULT_NAME")
-	if !ok {
-		return nil, errors.New("VAULT_NAME env not present")
-	}
-	switch provider {
+func SelectProvider(env *data.Env, lastUpdated time.Time) (v *Vault, err error) {
+	switch env.Provider {
 	case "azure":
-		v = &Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
+		v = &Vault{&keyvault.Keyvault{DestinationLastUpdated: lastUpdated, VaultName: env.VaultName}}
 	case "aws":
-		v = &Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated, VaultName: vaultName}}
+		v = &Vault{&secretsmanager.SecretsManager{DestinationLastUpdated: lastUpdated, VaultName: env.VaultName}}
 	case "gcp":
 		return nil, errors.New("Google Secrets Manager: Not implemented yet!")
 	case "hashicorp":

@@ -3,7 +3,6 @@ package consumer
 import (
 	"errors"
 	"log"
-	"os"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
@@ -19,40 +18,27 @@ type Consumer struct {
 	Destination Consumers
 }
 
-func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err error) {
+func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err error, updatedDestination bool) {
 	if len(secretList) == 0 {
 		log.Println("Nothing to update!")
-		return nil
+		return nil, false
 	}
-	return c.Destination.PostSecrets(secretList)
+	return c.Destination.PostSecrets(secretList), true
 }
 
 func (c *Consumer) GetLastUpdatedDate() (date time.Time, err error) {
 	return c.Destination.GetLastUpdatedDate()
 }
 
-func SelectConsumer() (c *Consumer, err error) {
-	consumerType, ok := os.LookupEnv("CONSUMER")
-	if !ok {
-		return nil, errors.New("CONSUMER env var not present")
-	}
-	vaultName := os.Getenv("VAULT_NAME")
-	switch consumerType {
+func SelectConsumer(env *data.Env) (c *Consumer, err error) {
+	switch env.ConsumerType {
 	case "kubernetes":
-		namespace, ok := os.LookupEnv("SECRET_NAMESPACE")
-		if !ok {
-			namespace = "default"
-		}
-		secretName, ok := os.LookupEnv("SECRET_NAME")
-		if !ok {
-			secretName = vaultName
-		}
-		if secretName == "" {
+		if env.SecretName == "" {
 			return nil, errors.New("Invalid secret name!")
 		}
 		c = &Consumer{&kubernetes.Config{
-			SecretName: secretName,
-			Namespace:  namespace,
+			SecretName: env.SecretName,
+			Namespace:  env.Namespace,
 		}}
 	default:
 		return nil, errors.New("No consumer provided.")

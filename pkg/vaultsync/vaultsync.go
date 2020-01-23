@@ -1,39 +1,39 @@
 package vaultsync
 
 import (
-	"log"
-
+	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/common/data"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/consumer"
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.1/pkg/vault"
 )
 
-func Synchronize() {
+func Synchronize(env *data.Env) (error, bool) {
 	// Select the destination
-	destination, err := consumer.SelectConsumer()
+	destination, err := consumer.SelectConsumer(env)
 	if err != nil {
-		log.Fatal(err)
+		return err, false
 	}
 
 	// Get lastUpdated date timestamp from consumer
 	destinationlastUpdated, err := destination.GetLastUpdatedDate()
 	if err != nil {
-		log.Fatal(err)
+		return err, false
 	}
 
 	// Select the source
-	source, err := vault.SelectProvider(destinationlastUpdated)
+	source, err := vault.SelectProvider(env, destinationlastUpdated)
 	if err != nil {
-		log.Fatal(err)
+		return err, false
 	}
 	// Poll secrets from vault which were updated since lastUpdated value
-	secretList, err := source.GetSecrets()
+	secretList, err := source.GetSecrets(env)
 	if err != nil {
-		log.Fatal(err)
+		return err, false
 	}
 
 	// Update kuberenetes secrets
-	err = destination.PostSecrets(secretList)
+	err, updatedDestination := destination.PostSecrets(secretList)
 	if err != nil {
-		log.Fatal(err)
+		return err, updatedDestination
 	}
+	return nil, updatedDestination
 }
