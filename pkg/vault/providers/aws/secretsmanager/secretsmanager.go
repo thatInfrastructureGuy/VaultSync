@@ -14,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/common/data"
-	"github.com/thatInfrastructureGuy/VaultSync/v0.0.8/pkg/common/providers/checks"
+	"github.com/thatInfrastructureGuy/VaultSync/pkg/common/data"
+	"github.com/thatInfrastructureGuy/VaultSync/pkg/common/providers/checks"
 )
 
 type SecretsManager struct {
