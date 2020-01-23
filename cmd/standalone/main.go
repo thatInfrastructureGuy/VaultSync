@@ -7,9 +7,8 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/v0.0.2/pkg/vaultsync"
 )
 
-var env *data.Env
-
 func main() {
+	env := &data.Env{}
 	err := env.Getenv()
 	if err != nil {
 		log.Fatal(err)

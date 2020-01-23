@@ -15,7 +15,6 @@ type Env struct {
 }
 
 func (e *Env) Getenv() error {
-	/////////vault.go
 	var ok bool
 	e.Provider, ok = os.LookupEnv("PROVIDER")
 	if !ok {
@@ -39,7 +38,6 @@ func (e *Env) Getenv() error {
 		e.SecretName = e.VaultName
 	}
 
-	// checks.go
 	_, ok = os.LookupEnv("CONVERT_HYPHENS_TO_UNDERSCORES")
 	if ok {
 		e.ConvertHyphenToUnderscores = true
