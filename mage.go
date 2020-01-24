@@ -13,6 +13,11 @@ func Build() {
 }
 
 // Install nothing. do nothing
-func Install() error {
+func InstallBuildUtils() error {
+	// 1. dockle
+	// 2. scopelint
+	// 3. kubeval
+	// 4. security check kube
+	// 5. integration test `kind`
 	return nil
 }

@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"os"
+	"strconv"
 )
 
 type Env struct {
@@ -11,10 +12,11 @@ type Env struct {
 	ConsumerType               string
 	Namespace                  string
 	SecretName                 string
+	RefreshRate                int
 	ConvertHyphenToUnderscores bool
 }
 
-func (e *Env) Getenv() error {
+func (e *Env) Getenv() (err error) {
 	var ok bool
 	e.Provider, ok = os.LookupEnv("PROVIDER")
 	if !ok {
@@ -36,6 +38,15 @@ func (e *Env) Getenv() error {
 	e.SecretName, ok = os.LookupEnv("SECRET_NAME")
 	if !ok {
 		e.SecretName = e.VaultName
+	}
+
+	refreshRate, ok := os.LookupEnv("REFRESH_RATE")
+	e.RefreshRate = 60
+	if ok {
+		e.RefreshRate, err = strconv.Atoi(refreshRate)
+		if err != nil {
+			return err
+		}
 	}
 
 	_, ok = os.LookupEnv("CONVERT_HYPHENS_TO_UNDERSCORES")

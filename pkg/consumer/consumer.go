@@ -2,7 +2,6 @@ package consumer
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/thatInfrastructureGuy/VaultSync/pkg/common/data"
@@ -20,7 +19,6 @@ type Consumer struct {
 
 func (c *Consumer) PostSecrets(secretList map[string]data.SecretAttribute) (err error, updatedDestination bool) {
 	if len(secretList) == 0 {
-		log.Println("Nothing to update!")
 		return nil, false
 	}
 	return c.Destination.PostSecrets(secretList), true
