@@ -56,6 +56,7 @@ func (k *Config) RedeployStatefulsets() (err error) {
 		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			// RetryOnConflict uses exponential backoff to avoid exhausting the apiserver
 			statefulsetObject.Spec.Template.ObjectMeta.Labels["redeployedByVaultSync"] = redeployDate
+			statefulsetObject.Spec.UpdateStrategy.Type = "RollingUpdate"
 			_, err = k.clientset.AppsV1().StatefulSets(k.Namespace).Update(statefulsetObject)
 			return err
 		})
