@@ -14,6 +14,8 @@ import (
 type Config struct {
 	clientset        *kubernetes.Clientset
 	secretObject     *apiv1.Secret
+	DeploymentList   []string
+	StatefulsetList  []string
 	SecretName       string
 	Namespace        string
 	KubeSecretExists bool

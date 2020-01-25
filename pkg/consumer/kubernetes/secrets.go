@@ -7,6 +7,7 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/pkg/common/data"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 )
 
 // createSecretObject creates a Kubernetes Secret Object in memory.
@@ -29,12 +30,14 @@ func (k *Config) createSecretObject() {
 // Errors out if namespace is not present.
 func (k *Config) secretUpdater() error {
 	namespace := k.secretObject.GetNamespace()
-	_, err := k.clientset.CoreV1().Secrets(namespace).Update(k.secretObject)
-	if err != nil {
-		log.Println("Error updating secret: ", err)
+	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Retrieve the latest version of Deployment before attempting update
+		// RetryOnConflict uses exponential backoff to avoid exhausting the apiserver
+		_, err := k.clientset.CoreV1().Secrets(namespace).Update(k.secretObject)
 		return err
-	}
-	return nil
+	})
+
+	return retryErr
 }
 
 // secretCreator creates secrets into specified Kubernetes Secret

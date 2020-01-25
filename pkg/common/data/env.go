@@ -4,14 +4,17 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Env struct {
 	Provider                   string
 	VaultName                  string
 	ConsumerType               string
-	Namespace                  string
+	DeploymentList             []string
+	StatefulsetList            []string
 	SecretName                 string
+	Namespace                  string
 	RefreshRate                int
 	ConvertHyphenToUnderscores bool
 }
@@ -47,6 +50,16 @@ func (e *Env) Getenv() (err error) {
 		if err != nil {
 			return err
 		}
+	}
+
+	deployments, ok := os.LookupEnv("DEPLOYMENT_LIST")
+	if ok {
+		e.DeploymentList = strings.Split(deployments, ",")
+	}
+
+	statefulsets, ok := os.LookupEnv("STATEFULSET_LIST")
+	if ok {
+		e.StatefulsetList = strings.Split(statefulsets, ",")
 	}
 
 	_, ok = os.LookupEnv("CONVERT_HYPHENS_TO_UNDERSCORES")
