@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,18 +14,19 @@ func (k *Config) PostExec() (err error) {
 		return err
 	}
 	if k.DeploymentList != nil {
-		return k.RedeployDeployment()
+		err = k.RedeployDeployment()
 	}
 	if k.StatefulsetList != nil {
-		return k.RedeployStatefulsets()
+		err = k.RedeployStatefulsets()
 	}
-	return nil
+	return err
 }
 
 func (k *Config) RedeployDeployment() (err error) {
 	redeployDate := time.Now().Format("2006-01-02-15_04_05")
 
 	for _, deployment := range k.DeploymentList {
+		deployment = strings.TrimSpace(deployment)
 		// Retrieve the latest version of Deployment before attempting update
 		deploymentObject, err := k.clientset.AppsV1().Deployments(k.Namespace).Get(deployment, metav1.GetOptions{})
 		if err != nil {
@@ -48,6 +50,7 @@ func (k *Config) RedeployStatefulsets() (err error) {
 	redeployDate := time.Now().Format("2006-01-02-15_04_05")
 
 	for _, statefulset := range k.StatefulsetList {
+		statefulset = strings.TrimSpace(statefulset)
 		statefulsetObject, err := k.clientset.AppsV1().StatefulSets(k.Namespace).Get(statefulset, metav1.GetOptions{})
 		if err != nil {
 			return err
