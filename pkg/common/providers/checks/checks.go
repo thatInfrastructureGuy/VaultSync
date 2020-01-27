@@ -15,7 +15,7 @@ func CommonProviderChecks(env *data.Env, originalSecretName string, sourceDate t
 		skipUpdate = true
 	}
 	// Check if ALL hyphers should be converted to underscores
-	if env.ConvertHyphenToUnderscores {
+	if env.ConvertHyphensToUnderscores {
 		updatedSecretName = strings.ReplaceAll(originalSecretName, "-", "_")
 	}
 	return updatedSecretName, skipUpdate

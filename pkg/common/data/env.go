@@ -8,15 +8,15 @@ import (
 )
 
 type Env struct {
-	Provider                   string
-	VaultName                  string
-	ConsumerType               string
-	DeploymentList             []string
-	StatefulsetList            []string
-	SecretName                 string
-	Namespace                  string
-	RefreshRate                int
-	ConvertHyphenToUnderscores bool
+	Provider                    string
+	VaultName                   string
+	ConsumerType                string
+	DeploymentList              []string
+	StatefulsetList             []string
+	SecretName                  string
+	Namespace                   string
+	RefreshRate                 int
+	ConvertHyphensToUnderscores bool
 }
 
 func (e *Env) Getenv() (err error) {
@@ -38,8 +38,8 @@ func (e *Env) Getenv() (err error) {
 	if !ok {
 		e.Namespace = "default"
 	}
-	e.SecretName, ok = os.LookupEnv("SECRET_NAME")
-	if !ok {
+	e.SecretName = os.Getenv("SECRET_NAME")
+	if len(e.SecretName) == 0 {
 		e.SecretName = e.VaultName
 	}
 
@@ -52,19 +52,19 @@ func (e *Env) Getenv() (err error) {
 		}
 	}
 
-	deployments, ok := os.LookupEnv("DEPLOYMENT_LIST")
-	if ok {
+	deployments := os.Getenv("DEPLOYMENT_LIST")
+	if len(deployments) > 0 {
 		e.DeploymentList = strings.Split(deployments, ",")
 	}
 
-	statefulsets, ok := os.LookupEnv("STATEFULSET_LIST")
-	if ok {
+	statefulsets := os.Getenv("STATEFULSET_LIST")
+	if len(statefulsets) > 0 {
 		e.StatefulsetList = strings.Split(statefulsets, ",")
 	}
 
-	_, ok = os.LookupEnv("CONVERT_HYPHENS_TO_UNDERSCORES")
-	if ok {
-		e.ConvertHyphenToUnderscores = true
+	convertHyphensToUnderscores := os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES")
+	if convertHyphensToUnderscores == "true" {
+		e.ConvertHyphensToUnderscores = true
 	}
 	return nil
 }
