@@ -30,7 +30,7 @@ func (e *Env) Getenv() (err error) {
 	}
 	e.ConsumerType = os.Getenv("CONSUMER")
 	if len(e.ConsumerType) == 0 {
-		return errors.New("CONSUMER env var not present")
+		e.ConsumerType = "kubernetes"
 	}
 	e.Namespace = os.Getenv("SECRET_NAMESPACE")
 	if len(e.Namespace) == 0 {
