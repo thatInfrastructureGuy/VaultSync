@@ -19,6 +19,7 @@ package data
 
 import (
 	"errors"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -67,8 +68,8 @@ func (e *Env) Getenv() (err error) {
 	refreshRate := getenv("REFRESH_RATE", "60")
 	e.RefreshRate, err = strconv.Atoi(refreshRate)
 	if err != nil {
+		log.Println("Invalid value for REFRESH_RATE. Defaulting it to 60.")
 		e.RefreshRate = 60
-		return err
 	}
 	return nil
 }

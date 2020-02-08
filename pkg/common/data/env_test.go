@@ -13,7 +13,7 @@ var testDataSets = []struct {
 	err   string
 }{
 	{
-		title: "No environment variable set",
+		title: "Set No Environment Variables",
 		in:    nil,
 		out:   Env{},
 		err:   "PROVIDER env not present",
@@ -29,7 +29,7 @@ var testDataSets = []struct {
 		err: "VAULT_NAME env not present",
 	},
 	{
-		title: "Only required environment variables set",
+		title: "Set Only Required Environment Variables",
 		in: map[string]string{
 			"PROVIDER":   "provider",
 			"VAULT_NAME": "myVault",
@@ -48,11 +48,11 @@ var testDataSets = []struct {
 		err: "",
 	},
 	{
-		title: "Refresh Rate set as a bad value",
+		title: "Invalid Refresh Rate",
 		in: map[string]string{
 			"PROVIDER":     "provider",
 			"VAULT_NAME":   "myVault",
-			"REFRESH_RATE": "748.95",
+			"REFRESH_RATE": "48.95",
 		},
 		out: Env{
 			Provider:                    "provider",
@@ -65,10 +65,10 @@ var testDataSets = []struct {
 			RefreshRate:                 60,
 			ConvertHyphensToUnderscores: false,
 		},
-		err: "strconv.Atoi: parsing \"748.95\": invalid syntax",
+		err: "",
 	},
 	{
-		title: "All environment variables set",
+		title: "Set All Environment Variables",
 		in: map[string]string{
 			"PROVIDER":                       "provider",
 			"CONSUMER":                       "kubernetes",
