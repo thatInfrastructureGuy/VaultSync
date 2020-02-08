@@ -64,6 +64,7 @@ func (e *Env) Getenv() (err error) {
 	refreshRate := getenv("REFRESH_RATE", "60")
 	e.RefreshRate, err = strconv.Atoi(refreshRate)
 	if err != nil {
+		e.RefreshRate = 60
 		return err
 	}
 	return nil
