@@ -7,16 +7,19 @@ import (
 )
 
 var testDataSets = []struct {
-	in  map[string]string
-	out Env
-	err string
+	title string
+	in    map[string]string
+	out   Env
+	err   string
 }{
 	{
-		in:  nil,
-		out: Env{},
-		err: "PROVIDER env not present",
+		title: "No environment variable set",
+		in:    nil,
+		out:   Env{},
+		err:   "PROVIDER env not present",
 	},
 	{
+		title: "Vault Name environment variable not set",
 		in: map[string]string{
 			"PROVIDER": "provider",
 		},
@@ -26,6 +29,7 @@ var testDataSets = []struct {
 		err: "VAULT_NAME env not present",
 	},
 	{
+		title: "Only required environment variables set",
 		in: map[string]string{
 			"PROVIDER":   "provider",
 			"VAULT_NAME": "myVault",
@@ -44,6 +48,7 @@ var testDataSets = []struct {
 		err: "",
 	},
 	{
+		title: "Refresh Rate set as a bad value",
 		in: map[string]string{
 			"PROVIDER":     "provider",
 			"VAULT_NAME":   "myVault",
@@ -63,26 +68,10 @@ var testDataSets = []struct {
 		err: "strconv.Atoi: parsing \"748.95\": invalid syntax",
 	},
 	{
-		in: map[string]string{
-			"PROVIDER":   "provider",
-			"VAULT_NAME": "myVault",
-		},
-		out: Env{
-			Provider:                    "provider",
-			VaultName:                   "myVault",
-			ConsumerType:                "kubernetes",
-			DeploymentList:              nil,
-			StatefulsetList:             nil,
-			SecretName:                  "myVault",
-			Namespace:                   "default",
-			RefreshRate:                 60,
-			ConvertHyphensToUnderscores: false,
-		},
-		err: "",
-	},
-	{
+		title: "All environment variables set",
 		in: map[string]string{
 			"PROVIDER":                       "provider",
+			"CONSUMER":                       "kubernetes",
 			"VAULT_NAME":                     "myVault",
 			"SECRET_NAME":                    "mySecret",
 			"SECRET_NAMESPACE":               "ns",
@@ -108,24 +97,26 @@ var testDataSets = []struct {
 
 func TestGetenv(t *testing.T) {
 	for _, testData := range testDataSets {
-		if testData.in != nil {
-			for key, value := range testData.in {
-				os.Setenv(key, value)
+		t.Run(testData.title, func(t *testing.T) {
+			if testData.in != nil {
+				for key, value := range testData.in {
+					os.Setenv(key, value)
+				}
 			}
-		}
-		var envVars Env
-		err := envVars.Getenv()
-		if testData.in != nil {
-			for key, _ := range testData.in {
-				os.Unsetenv(key)
+			var envVars Env
+			err := envVars.Getenv()
+			if testData.in != nil {
+				for key, _ := range testData.in {
+					os.Unsetenv(key)
+				}
 			}
-		}
-		compareData(t, envVars, testData.out)
-		if err != nil {
-			if err.Error() != testData.err {
-				t.Errorf("Error Got '%v' Error Want '%v'", err.Error(), testData.err)
+			compareData(t, envVars, testData.out)
+			if err != nil {
+				if err.Error() != testData.err {
+					t.Errorf("Error Got '%v' Error Want '%v'", err.Error(), testData.err)
+				}
 			}
-		}
+		})
 	}
 }
 
