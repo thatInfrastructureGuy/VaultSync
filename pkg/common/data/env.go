@@ -37,46 +37,42 @@ type Env struct {
 }
 
 func (e *Env) Getenv() (err error) {
-	e.Provider = os.Getenv("PROVIDER")
+	e.Provider = getenv("PROVIDER", "")
 	if len(e.Provider) == 0 {
 		return errors.New("PROVIDER env not present")
 	}
-	e.VaultName = os.Getenv("VAULT_NAME")
+	e.VaultName = getenv("VAULT_NAME", "")
 	if len(e.VaultName) == 0 {
 		return errors.New("VAULT_NAME env not present")
 	}
-	e.ConsumerType = os.Getenv("CONSUMER")
-	if len(e.ConsumerType) == 0 {
-		e.ConsumerType = "kubernetes"
-	}
-	e.Namespace = os.Getenv("SECRET_NAMESPACE")
-	if len(e.Namespace) == 0 {
-		e.Namespace = "default"
-	}
-	e.SecretName = os.Getenv("SECRET_NAME")
-	if len(e.SecretName) == 0 {
-		e.SecretName = e.VaultName
-	}
-	deployments := os.Getenv("DEPLOYMENT_LIST")
+	e.ConsumerType = getenv("CONSUMER", "kubernetes")
+	e.Namespace = getenv("SECRET_NAMESPACE", "default")
+	e.SecretName = getenv("SECRET_NAME", e.VaultName)
+	deployments := getenv("DEPLOYMENT_LIST", "")
 	if len(deployments) > 0 {
 		e.DeploymentList = strings.Split(deployments, ",")
 	}
-	statefulsets := os.Getenv("STATEFULSET_LIST")
+	statefulsets := getenv("STATEFULSET_LIST", "")
 	if len(statefulsets) > 0 {
 		e.StatefulsetList = strings.Split(statefulsets, ",")
 	}
-	convertHyphensToUnderscores := os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES")
+	convertHyphensToUnderscores := getenv("CONVERT_HYPHENS_TO_UNDERSCORES", "false")
 	if convertHyphensToUnderscores == "true" {
 		e.ConvertHyphensToUnderscores = true
 	}
 
-	e.RefreshRate = 60
-	refreshRate := os.Getenv("REFRESH_RATE")
-	if len(refreshRate) > 0 {
-		e.RefreshRate, err = strconv.Atoi(refreshRate)
-		if err != nil {
-			return err
-		}
+	refreshRate := getenv("REFRESH_RATE", "60")
+	e.RefreshRate, err = strconv.Atoi(refreshRate)
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func getenv(envVar, defaultValue string) (value string) {
+	value = os.Getenv(envVar)
+	if len(value) == 0 {
+		value = defaultValue
+	}
+	return value
 }
