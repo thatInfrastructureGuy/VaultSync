@@ -24,18 +24,21 @@ import (
 	"strings"
 )
 
+// Env: This struct is instantiated by environment variables.
 type Env struct {
-	Provider                    string
-	VaultName                   string
-	ConsumerType                string
-	DeploymentList              []string
-	StatefulsetList             []string
-	SecretName                  string
-	Namespace                   string
-	RefreshRate                 int
-	ConvertHyphensToUnderscores bool
+	Provider                    string   // [Required] Cloud providers eg: aws, azure, gcp
+	VaultName                   string   // [Required] Vault from which secrets will be pulled
+	ConsumerType                string   // [Optional] Consumer Name eg: kubernetes
+	DeploymentList              []string // [Optional] Comma separated list of deployments which need to be restarted on secret update.
+	StatefulsetList             []string // [Optional] Comma separated list of statefulsets which need to be restarted on secret update.
+	SecretName                  string   // [Optional] Name of the secret to be created/updated. Defaults to vaultName value.
+	Namespace                   string   // [Optional] Kubernetes namespace where the secret is created/updated.
+	RefreshRate                 int      // [Optional] Rate at which check for updated secret should be done. Defaults to 60.
+	ConvertHyphensToUnderscores bool     // [Optional] Converts secret keys with - to _. Eg: MY-KEY ==> MY_KEY . Defaults to false.
 }
 
+// Getenv is wrapper function which instantiates Env struct
+// from Environment Variables. Some sane defaults are set here.
 func (e *Env) Getenv() (err error) {
 	e.Provider = getenv("PROVIDER", "")
 	if len(e.Provider) == 0 {
@@ -70,6 +73,11 @@ func (e *Env) Getenv() (err error) {
 	return nil
 }
 
+// getenv is the internal function which does the grunt work
+// of getting environment variables. Error handling is left to the wrapper function.
+// Input1: Environment Variable to look up
+// Input2: Default Value to set if envVar not found.
+// Output1: Returns Value of the envVar
 func getenv(envVar, defaultValue string) (value string) {
 	value = os.Getenv(envVar)
 	if len(value) == 0 {
