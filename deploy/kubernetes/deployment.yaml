@@ -14,12 +14,13 @@
 # limitations under the License.
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: app
   name: nginxapp
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -30,6 +31,7 @@ spec:
       labels:
         app: app
     spec:
+      serviceAccountName: vaultsync
       initContainers:
       - name: vaultsync
         image: thatinfrastructureguy/vaultsync:v0.0.14
@@ -43,7 +45,9 @@ spec:
         - name: REFRESH_RATE
           value: "0"
         - name: VAULT_NAME
-          value: "my-secrets-manager"
+          value: "my-cloud-vault"
+        - name: SECRET_NAME
+          value: "my-secrets"
         - name: SECRET_NAMESPACE
           valueFrom:
             fieldRef:
@@ -53,7 +57,7 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: "my-secrets-manager"
+            name: "my-secrets"
         name: nginxapp
         image: nginx
         imagePullPolicy: Always
