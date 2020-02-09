@@ -16,14 +16,18 @@ spec:
     spec:
       initContainers:
       - name: vaultsync
-        image: datinfraguy/vaultsync:v0.0.2
+        image: thatinfrastructureguy/vaultsync:v0.0.14
         imagePullPolicy: Always
         envFrom:
         - secretRef:
-            name: vaultsync
+            name: provider-credentials
         env:
+        - name: PROVIDER
+          value: "azure"
+        - name: REFRESH_RATE
+          value: "0"
         - name: VAULT_NAME
-          value: kvtestin
+          value: "my-secrets-manager"
         - name: SECRET_NAMESPACE
           valueFrom:
             fieldRef:
@@ -33,7 +37,7 @@ spec:
       containers:
       - envFrom:
         - secretRef:
-            name: kvtestin
+            name: "my-secrets-manager"
         name: nginxapp
         image: nginx
         imagePullPolicy: Always
