@@ -23,6 +23,12 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/pkg/vault"
 )
 
+// Synchronize is the entrypoint of the logic of VaultSync package.
+// 1. Select the provider and consumer from the env variables.
+// 2. Get the dateUpdated from Consumer.
+// 3. Check the provider if secrets have been updated since dateUpdated date
+// 4. if yes, update the secrets in destination.
+// 5. if no, do nothing.
 func Synchronize(env *data.Env) (error, bool) {
 	// Select the destination
 	destination, err := consumer.SelectConsumer(env)
