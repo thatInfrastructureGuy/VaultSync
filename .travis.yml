@@ -18,7 +18,7 @@ os:
 install: true
 
 script:
-  - ./mage/mage -v test
+  - go run mage.go -v test
   - go test -tags=CI -race ./... -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
