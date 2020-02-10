@@ -20,6 +20,7 @@
 package main
 
 import (
+	"github.com/magefile/mage/sh"
 	"log"
 )
 
@@ -36,4 +37,9 @@ func InstallBuildUtils() error {
 	// 4. security check kube
 	// 5. integration test `kind`
 	return nil
+}
+
+// Run tests
+func Test() error {
+	return sh.Run("go", "test", "./...", "-tags", "CI")
 }

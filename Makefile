@@ -44,7 +44,7 @@ endif
 SOURCES := $(shell find . -name '*.go')
 
 test:
-	go test ./... 
+	go test -race ./... 
 
 get-deps:
 	go mod tidy
