@@ -44,6 +44,12 @@ COPY --from=build-env /etc/passwd /etc/passwd
 USER scratchuser
 WORKDIR /app
 
+# Metadata params
+ARG BUILD_DATE
+ARG VERSION
+ARG VCS_URL
+ARG VCS_REF
+
 # Metadata
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="VaultSync" \

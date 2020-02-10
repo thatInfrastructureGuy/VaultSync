@@ -72,5 +72,8 @@ docker_push:
 	docker push $(DOCKER_IMAGE):$(DOCKER_TAG)
 	docker push $(DOCKER_IMAGE):latest
 
+	# Update Microbadger
+	curl -X POST https://hooks.microbadger.com/images/thatinfrastructureguy/vaultsync/c-_GedIOd9DtLPdKLM0ipwBnCcE=
+
 output:
 	@echo Docker Image: $(DOCKER_IMAGE):$(DOCKER_TAG)
