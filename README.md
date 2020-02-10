@@ -17,6 +17,7 @@ Sync secrets between Vaults and Kubernetes Secrets
 [![Image Layers](https://images.microbadger.com/badges/image/thatinfrastructureguy/vaultsync.svg)](https://microbadger.com/images/thatinfrastructureguy/vaultsync)
 [![Image Tag](https://images.microbadger.com/badges/version/thatinfrastructureguy/vaultsync.svg)](https://microbadger.com/images/thatinfrastructureguy/vaultsync)
 ![Docker Pulls](https://img.shields.io/docker/pulls/thatinfrastructureguy/vaultsync)
+[![Docker Image Commit ID](https://images.microbadger.com/badges/commit/thatinfrastructureguy/vaultsync.svg)](https://microbadger.com/images/thatinfrastructureguy/vaultsync)
 
 ![Animated terminal showing step in practice]()
 
