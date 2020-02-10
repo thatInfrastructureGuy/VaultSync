@@ -33,7 +33,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -a -trimpath -tags netgo -ldflags "-s -w -extldflags '-static' \
-     -X main.CodeVersion=$VERSION -X 'main.BuildTime=$BUILD_DATE' -X 'main.GoVersion=`go version`'"
+    -X main.CodeVersion=$VERSION -X 'main.BuildTime=$BUILD_DATE' -X 'main.GoVersion=`go version`'" \
     -o /app/publish/vaultsync \
     /app/cmd/standalone/main.go
 

@@ -27,7 +27,14 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/pkg/vaultsync"
 )
 
+var (
+	CodeVersion string
+	BuildTime   string
+	GoVersion   string
+)
+
 func main() {
+	log.Printf("[VaultSync] CodeVersion = [%s], BuildTime = [%s], GoVersion = [%s]", CodeVersion, BuildTime, GoVersion)
 	env := &data.Env{}
 	err := env.Getenv()
 	if err != nil {
