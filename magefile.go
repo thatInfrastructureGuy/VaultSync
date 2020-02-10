@@ -1,3 +1,5 @@
+// +build mage
+
 /*
  * Copyright 2020 Kulkarni, Ashish <thatInfrastructureGuy@gmail.com>
  * Author: Ashish Kulkarni
@@ -15,12 +17,9 @@
  * limitations under the License.
  */
 
-// +build mage
-
 package main
 
 import (
-	"fmt"
 	"log"
 )
 

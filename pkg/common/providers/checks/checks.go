@@ -24,6 +24,8 @@ import (
 	"github.com/thatInfrastructureGuy/VaultSync/pkg/common/data"
 )
 
+// CommonProviderChecks performs checks/tasks which are provider agnostic.
+// These tasks act as final sanitization checkpoint before the data is traferred to Consumers.
 func CommonProviderChecks(env *data.Env, originalSecretName string, sourceDate time.Time, destinationDate time.Time) (updatedSecretName string, skipUpdate bool) {
 	// Set updatedName as original name
 	updatedSecretName = originalSecretName

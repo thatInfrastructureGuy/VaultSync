@@ -20,9 +20,9 @@ package data
 import "time"
 
 // SecretAttribute is constructed after querying Vault for each secret.
-// It contains various attributes of secret other than values.
+// This is core object which is passed from providers to consumers.
 type SecretAttribute struct {
-	DateUpdated       time.Time
-	Value             string
-	MarkedForDeletion bool
+	DateUpdated       time.Time // Last time the secret was updated.
+	Value             string    // The value of the secret key
+	MarkedForDeletion bool      // Identifier which tells consumer if to discard the secret.
 }

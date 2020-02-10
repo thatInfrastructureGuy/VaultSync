@@ -19,64 +19,70 @@ package data
 
 import (
 	"errors"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
+// Env: This struct is instantiated by environment variables.
 type Env struct {
-	Provider                    string
-	VaultName                   string
-	ConsumerType                string
-	DeploymentList              []string
-	StatefulsetList             []string
-	SecretName                  string
-	Namespace                   string
-	RefreshRate                 int
-	ConvertHyphensToUnderscores bool
+	Provider                    string   // [Required] Cloud providers eg: aws, azure, gcp
+	VaultName                   string   // [Required] Vault from which secrets will be pulled
+	ConsumerType                string   // [Optional] Consumer Name eg: kubernetes
+	DeploymentList              []string // [Optional] Comma separated list of deployments which need to be restarted on secret update.
+	StatefulsetList             []string // [Optional] Comma separated list of statefulsets which need to be restarted on secret update.
+	SecretName                  string   // [Optional] Name of the secret to be created/updated. Defaults to vaultName value.
+	Namespace                   string   // [Optional] Kubernetes namespace where the secret is created/updated.
+	RefreshRate                 int      // [Optional] Rate at which check for updated secret should be done. Defaults to 60.
+	ConvertHyphensToUnderscores bool     // [Optional] Converts secret keys with - to _. Eg: MY-KEY ==> MY_KEY . Defaults to false.
 }
 
+// Getenv is wrapper function which instantiates Env struct
+// from Environment Variables. Some sane defaults are set here.
 func (e *Env) Getenv() (err error) {
-	e.Provider = os.Getenv("PROVIDER")
+	e.Provider = getenv("PROVIDER", "")
 	if len(e.Provider) == 0 {
 		return errors.New("PROVIDER env not present")
 	}
-	e.VaultName = os.Getenv("VAULT_NAME")
+	e.VaultName = getenv("VAULT_NAME", "")
 	if len(e.VaultName) == 0 {
 		return errors.New("VAULT_NAME env not present")
 	}
-	e.ConsumerType = os.Getenv("CONSUMER")
-	if len(e.ConsumerType) == 0 {
-		e.ConsumerType = "kubernetes"
-	}
-	e.Namespace = os.Getenv("SECRET_NAMESPACE")
-	if len(e.Namespace) == 0 {
-		e.Namespace = "default"
-	}
-	e.SecretName = os.Getenv("SECRET_NAME")
-	if len(e.SecretName) == 0 {
-		e.SecretName = e.VaultName
-	}
-	deployments := os.Getenv("DEPLOYMENT_LIST")
+	e.ConsumerType = getenv("CONSUMER", "kubernetes")
+	e.Namespace = getenv("SECRET_NAMESPACE", "default")
+	e.SecretName = getenv("SECRET_NAME", e.VaultName)
+	deployments := getenv("DEPLOYMENT_LIST", "")
 	if len(deployments) > 0 {
 		e.DeploymentList = strings.Split(deployments, ",")
 	}
-	statefulsets := os.Getenv("STATEFULSET_LIST")
+	statefulsets := getenv("STATEFULSET_LIST", "")
 	if len(statefulsets) > 0 {
 		e.StatefulsetList = strings.Split(statefulsets, ",")
 	}
-	convertHyphensToUnderscores := os.Getenv("CONVERT_HYPHENS_TO_UNDERSCORES")
+	convertHyphensToUnderscores := getenv("CONVERT_HYPHENS_TO_UNDERSCORES", "false")
 	if convertHyphensToUnderscores == "true" {
 		e.ConvertHyphensToUnderscores = true
 	}
 
-	e.RefreshRate = 60
-	refreshRate := os.Getenv("REFRESH_RATE")
-	if len(refreshRate) > 0 {
-		e.RefreshRate, err = strconv.Atoi(refreshRate)
-		if err != nil {
-			return err
-		}
+	refreshRate := getenv("REFRESH_RATE", "60")
+	e.RefreshRate, err = strconv.Atoi(refreshRate)
+	if err != nil {
+		log.Println("Invalid value for REFRESH_RATE. Defaulting it to 60.")
+		e.RefreshRate = 60
 	}
 	return nil
+}
+
+// getenv is the internal function which does the grunt work
+// of getting environment variables. Error handling is left to the wrapper function.
+// Input1: Environment Variable to look up
+// Input2: Default Value to set if envVar not found.
+// Output1: Returns Value of the envVar
+func getenv(envVar, defaultValue string) (value string) {
+	value = os.Getenv(envVar)
+	if len(value) == 0 {
+		value = defaultValue
+	}
+	return value
 }
