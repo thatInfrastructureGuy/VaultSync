@@ -22,4 +22,7 @@ install:
 script:
   - go mod download || true
   - mage -v test
-  - go test -tags=CI -race ./...
+  - go test -tags=CI -race ./... -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
