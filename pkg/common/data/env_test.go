@@ -123,7 +123,7 @@ func TestGetenv(t *testing.T) {
 			var envVars Env
 			err := envVars.Getenv()
 			if testData.in != nil {
-				for key, _ := range testData.in {
+				for key := range testData.in {
 					os.Unsetenv(key)
 				}
 			}

@@ -43,7 +43,9 @@ type SecretsManager struct {
 
 func (s *SecretsManager) listSecrets() (err error) {
 	//Create a Secrets Manager client
-	svc := secretsmanager.New(session.New())
+	awsSession := session.Must(session.NewSession())
+	// Create a SecretsManager client from just a session.
+	svc := secretsmanager.New(awsSession)
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(s.VaultName),
 		VersionStage: aws.String("AWSCURRENT"), // VersionStage defaults to AWSCURRENT if unspecified
