@@ -11,6 +11,7 @@ Sync secrets between Vaults and Kubernetes Secrets
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/thatInfrastructureGuy/VaultSync)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thatInfrastructureGuy/VaultSync)](https://goreportcard.com/report/github.com/thatInfrastructureGuy/VaultSync)
 [![Build Status](https://travis-ci.com/thatInfrastructureGuy/VaultSync.svg?branch=master)](https://travis-ci.com/thatInfrastructureGuy/VaultSync)
+[![GolangCI](https://golangci.com/badges/github.com/golangci/golangci-web.svg)](https://golangci.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ### Docker Image

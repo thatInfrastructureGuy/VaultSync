@@ -110,7 +110,6 @@ func (k *Config) getSecretObject() {
 		return
 	}
 	k.KubeSecretExists = true
-	return
 }
 
 func (k *Config) GetLastUpdatedDate() (date time.Time, err error) {

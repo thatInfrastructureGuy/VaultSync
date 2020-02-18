@@ -56,7 +56,7 @@ func (k *Config) RedeployDeployment() (err error) {
 			_, err = k.clientset.AppsV1().Deployments(k.Namespace).Update(deploymentObject)
 			return err
 		})
-		if err != nil {
+		if retryErr != nil {
 			return retryErr
 		}
 	}
@@ -80,7 +80,9 @@ func (k *Config) RedeployStatefulsets() (err error) {
 			_, err = k.clientset.AppsV1().StatefulSets(k.Namespace).Update(statefulsetObject)
 			return err
 		})
-		return retryErr
+		if retryErr != nil {
+			return retryErr
+		}
 	}
 	return nil
 }
