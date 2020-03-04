@@ -24,7 +24,7 @@ import (
 	"log"
 )
 
-// Teri maa ki aankh
+// Build Utils
 func Build() {
 	log.Println("build")
 }
