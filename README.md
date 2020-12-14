@@ -1,5 +1,5 @@
 # VaultSync
-Sync secrets between Vaults and Kubernetes Secrets
+Sync secrets between Vaults and Kubernetes Secrets!
 
 [Website](https://thatInfrastructureGuy.com) |
 [Documentation](#Documentation) |
