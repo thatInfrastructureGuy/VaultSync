@@ -1,7 +1,6 @@
 # VaultSync
 Sync secrets between Vaults and Kubernetes Secrets
 
-
 [Website](https://thatInfrastructureGuy.com) |
 [Documentation](#Documentation) |
 [Installation Guide](#installation-guide) |
