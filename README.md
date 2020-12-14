@@ -20,4 +20,3 @@ Sync secrets between Vaults and Kubernetes Secrets
 [![Docker Image Commit ID](https://images.microbadger.com/badges/commit/thatinfrastructureguy/vaultsync.svg)](https://microbadger.com/images/thatinfrastructureguy/vaultsync)
 
 ![Animated terminal showing step in practice]()
-
